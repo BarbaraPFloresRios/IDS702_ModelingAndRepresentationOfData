@@ -1,8 +1,15 @@
 ---
-title: "Untitled"
-format: html
-editor: visual
+title: "Airbnb Price Regression Modeling"
+author: "Barbara Flores"
+format:
+  pdf:
+    documentclass: scrartcl
+    papersize: letter
 ---
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
 
 ```{r}
 library(pacman)
@@ -17,4 +24,17 @@ Airbnb <- read_csv(path)
 ```{r}
 glimpse(Airbnb)
 
+```
+
+```{r}
+model <- lm(bedrooms ~  accommodates + bedrooms,
+            data = Airbnb)
+summary(model)
+```
+
+```{r}
+ruta_actual <- getwd()
+
+# Imprimir la ruta
+print(ruta_actual)
 ```
