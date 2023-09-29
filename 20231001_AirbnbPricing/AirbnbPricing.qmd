@@ -7,12 +7,10 @@ output:
     latex_engine: pdflatex
 ---
 
-```{r include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results='hide')
 
 library(pacman)
-
-
 ```
 
 ```{r}
@@ -22,18 +20,16 @@ path <- "https://raw.githubusercontent.com/BarbaraPFloresRios/IDS702_ModelingAnd
 
 Airbnb <- read_csv(path)
 glimpse(Airbnb)
+#summary(Airbnb)
 
 ```
 
 ```{r}
-model <- lm(bedrooms ~  accommodates + bedrooms,
+model <- lm(bedrooms ~  accommodates +  beds,
             data = Airbnb)
 summary(model)
 ```
 
-```{r}
-ruta_actual <- getwd()
-
-# Imprimir la ruta
-print(ruta_actual)
+```{r, results='asis'}
+print("hola")
 ```
