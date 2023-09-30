@@ -14,12 +14,16 @@ library(pacman)
 ```
 
 ```{r}
+# 
 p_load(tidymodels, tidyverse, readr)
 
 path <- "https://raw.githubusercontent.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/main/20231001_AirbnbPricing/listings.csv"
 
 Airbnb <- read_csv(path)
-glimpse(Airbnb)
+
+Airbnb_sub <- Airbnb |> select(-c("id","listing_url","scrape_id","last_scraped","name","description","neighborhood_overview","picture_url","host_id","host_url","host_name","host_location","host_about","host_thumbnail_url","host_picture_url","host_neighbourhood","host_listings_count","neighbourhood_group_cleansed","bathrooms","calendar_updated","first_review","last_review","license"))
+
+glimpse(Airbnb_sub)
 #summary(Airbnb)
 
 ```
