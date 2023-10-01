@@ -10,11 +10,11 @@ output:
 ```{r, include = FALSE}
 # Global settings to hide code and results in the final document
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results='hide')
-
-library(pacman)
 ```
 
 ```{r}
+library(pacman)
+
 # Load required packages and read Airbnb data from GitHub
 p_load(tidymodels, tidyverse, readr)
 
@@ -28,41 +28,64 @@ Airbnb <- read_csv(path)
 
 #We created the Airbnb_sub dataset for easier work. First, we removed the variables that will not be useful for the model
 
-Airbnb_sub <- Airbnb |> select(-c("id","listing_url","scrape_id","last_scraped","source","name","description","neighborhood_overview","picture_url","host_id","host_url","host_name","host_location","host_about","host_thumbnail_url","host_picture_url","host_neighbourhood","host_listings_count","neighbourhood_group_cleansed","bathrooms","calendar_updated","first_review","last_review","license"))
+Airbnb_sub <- Airbnb |> select(-c("id","listing_url","scrape_id","last_scraped","source","name","description","neighborhood_overview","picture_url","host_id","host_url","host_name","host_location","host_about","host_thumbnail_url","host_picture_url","host_neighbourhood","host_listings_count","host_verifications","neighbourhood_cleansed","neighbourhood_group_cleansed","bathrooms","calendar_updated","first_review","last_review","license"))
 
-#host_since
-#To include the date since the host joined the platform, we will consider the number of days between their joining date and the date when the database was extracted, i.e., June 18, 2023.
+# host_since
+# To include the date since the host joined the platform, we will consider the number of days between their joining date and the date when the database was extracted, i.e., June 18, 2023.
 
 Airbnb_sub$host_days_since_joining <- round(as.numeric(difftime("2023-06-18", Airbnb_sub$host_since, units = "days")))
 
-#host_response_time
+# host_response_time
 Airbnb_sub$host_response_time_category <- factor(Airbnb_sub$host_response_time, levels = c("N/A", "a few days or more", "within a day", "within a few hours", "within an hour"))
 
-
 # host_response_rate
-Airbnb_sub$host_response_rate_numeric <- as.numeric(gsub("%", "", Airbnb_sub$host_response_rate)) / 100
+Airbnb_sub <- Airbnb_sub %>%
+  mutate(host_response_rate_percentage = as.numeric(sub("%", "", host_response_rate)) / 100)
 
+# host_acceptance_rate
+Airbnb_sub <- Airbnb_sub %>%
+  mutate(host_acceptance_rate_percentage = as.numeric(sub("%", "", host_acceptance_rate)) / 100)
 
-```
+# neighbourhood
+Airbnb_sub <- Airbnb_sub %>%
+  mutate(neighbourhood_grouped = case_when(
+    grepl("Arden", neighbourhood) ~ "Arden",
+    grepl("Asheville", neighbourhood) ~ "Asheville",
+    grepl("Ashville", neighbourhood) ~ "Asheville",
+    grepl("Avery Creek", neighbourhood) ~ "Avery Creek",
+    grepl("Biltmore Forest", neighbourhood) ~ "Biltmore Forest",
+    grepl("Buncombe County", neighbourhood) ~ "Buncombe County",
+    grepl("Candler", neighbourhood) ~ "Candler",
+    grepl("Fairview", neighbourhood) ~ "Fairview",
+    grepl("Fletcher", neighbourhood) ~ "Fletcher",
+    grepl("Leicester", neighbourhood) ~ "Leicester",
+    grepl("Woodfin", neighbourhood) ~ "Woodfin",
+    TRUE ~ "Others"
+  ))
 
-```{r}
-niveles <- levels(Airbnb_sub$host_response_time_category)
+Airbnb_sub <- Airbnb_sub |> select(-c("host_since","host_response_time","host_response_rate","host_acceptance_rate","neighbourhood"))
 
-# Imprimir los niveles
-print(niveles)
 ```
 
 ```{r}
 glimpse(Airbnb_sub)
-#summary(Airbnb)
+summary(Airbnb_sub)
 ```
 
 ```{r}
-model <- lm(bedrooms ~  accommodates +  beds + host_response_rate_numeric,
+model <- lm(bedrooms ~  accommodates +  beds + host_response_rate_percentage,
             data = Airbnb_sub)
 summary(model)
 ```
 
 ```{r, results='asis'}
 print("hola")
+```
+
+```{r}
+# Ver valores únicos en la columna host_response_rate
+unique(Airbnb_sub$host_is_superhost)
+
+# Ver resumen estadístico de la columna host_acceptance_rate
+summary(Airbnb_sub$host_is_superhost)
 ```
