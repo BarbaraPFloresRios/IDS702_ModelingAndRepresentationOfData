@@ -86,7 +86,6 @@ Airbnb_sub <- Airbnb_sub %>%
     )
   )
 
-
 # room_type
 Airbnb_sub$room_type <- factor(Airbnb_sub$room_type)
 
@@ -95,9 +94,38 @@ Airbnb_sub$bathrooms_text <- gsub("Half-bath|Shared half-bath", "0.5", Airbnb_su
 
 Airbnb_sub$bathrooms_numeric <- as.numeric(gsub("[^0-9.]", "", Airbnb_sub$bathrooms_text))
 
+```
 
+```{r}
+#amenities
+
+#Binary variables are created for the most repeated amenities, grouping some categories to facilitate data management (since originally there are 2115 different amenities).
+
+Airbnb_sub <- Airbnb_sub %>%
+  mutate(
+    security = ifelse(grepl("alarm|fire extinguisher|extinguisher|first aid kit", tolower(amenities)), TRUE, FALSE),
+    essentials = ifelse(grepl("essentials|hot water", tolower(amenities)), TRUE, FALSE),
+    kitchen_amenities = ifelse(grepl("dishes and silverware|microwave|kitchen|refrigerator|cooking  basics|coffee|freezer|wine glasses|oven|toaster|dining table", tolower(amenities)), TRUE, FALSE),
+    entertainment = ifelse(grepl("tv|television|netflix|hdtv|fire t", tolower(amenities)), TRUE, FALSE),
+    bedroom_amenities = ifelse(grepl("hangers|bed linens|iron|extra pillows and blankets", tolower(amenities)), TRUE, FALSE),
+    work = ifelse(grepl("wifi|dedicated workspace", tolower(amenities)), TRUE, FALSE),
+    parking = ifelse(grepl("parking", tolower(amenities)), TRUE, FALSE),
+    toiletries = ifelse(grepl("hair dryer|shampoo|sleaning products|body soap|shower gel|conditioner", tolower(amenities)), TRUE, FALSE),
+    climate_control = ifelse(grepl("heating|air conditioning", tolower(amenities)), TRUE, FALSE),
+    convenience_features = ifelse(grepl("self check-in|private entrance", tolower(amenities)), TRUE, FALSE)
+  )
+```
+
+```{r}
+#we continue transforming the variables
+
+#price
+Airbnb_sub$price_numeric <- as.numeric(gsub("\\$", "", Airbnb_sub$price))
+```
+
+```{r}
 #
-Airbnb_sub <- Airbnb_sub |> select(-c("host_since","host_response_time","host_response_rate","host_acceptance_rate","neighbourhood", "latitude", "longitude","property_type", "bathrooms_text" ))
+Airbnb_sub <- Airbnb_sub |> select(-c("host_since","host_response_time","host_response_rate","host_acceptance_rate","neighbourhood", "latitude", "longitude","property_type", "bathrooms_text" , "amenities","price"))
 
 ```
 
