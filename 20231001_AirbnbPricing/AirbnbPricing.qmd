@@ -26,9 +26,30 @@ Airbnb <- read_csv(path)
 ```{r}
 # Cleaning data and selecting relevant columns for predictive modeling
 
+#We created the Airbnb_sub dataset for easier work. First, we removed the variables that will not be useful for the model
+
 Airbnb_sub <- Airbnb |> select(-c("id","listing_url","scrape_id","last_scraped","source","name","description","neighborhood_overview","picture_url","host_id","host_url","host_name","host_location","host_about","host_thumbnail_url","host_picture_url","host_neighbourhood","host_listings_count","neighbourhood_group_cleansed","bathrooms","calendar_updated","first_review","last_review","license"))
 
+#host_since
+#To include the date since the host joined the platform, we will consider the number of days between their joining date and the date when the database was extracted, i.e., June 18, 2023.
 
+Airbnb_sub$host_days_since_joining <- round(as.numeric(difftime("2023-06-18", Airbnb_sub$host_since, units = "days")))
+
+#host_response_time
+Airbnb_sub$host_response_time_category <- factor(Airbnb_sub$host_response_time, levels = c("N/A", "a few days or more", "within a day", "within a few hours", "within an hour"))
+
+
+# host_response_rate
+Airbnb_sub$host_response_rate_numeric <- as.numeric(gsub("%", "", Airbnb_sub$host_response_rate)) / 100
+
+
+```
+
+```{r}
+niveles <- levels(Airbnb_sub$host_response_time_category)
+
+# Imprimir los niveles
+print(niveles)
 ```
 
 ```{r}
@@ -37,8 +58,8 @@ glimpse(Airbnb_sub)
 ```
 
 ```{r}
-model <- lm(bedrooms ~  accommodates +  beds,
-            data = Airbnb)
+model <- lm(bedrooms ~  accommodates +  beds + host_response_rate_numeric,
+            data = Airbnb_sub)
 summary(model)
 ```
 
