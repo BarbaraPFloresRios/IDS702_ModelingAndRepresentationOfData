@@ -1,10 +1,8 @@
 ---
-title: "Airbnb Price Regression Modeling"
-author: "Barbara Flores"
 format: pdf 
 output: 
   pdf_document: 
-  latex_engine: pdflatex
+  latex_engine: xelatex
 ---
 
 ```{r, include = FALSE}
@@ -95,7 +93,7 @@ Airbnb_sub <- Airbnb_sub %>%
   )
 
 # room_type
-Airbnb_sub$room_type <- factor(Airbnb_sub$room_type)
+Airbnb_sub$entire_home_apt <- ifelse(Airbnb_sub$room_type == "Entire home/apt", TRUE, FALSE)
 
 # bathrooms_text
 Airbnb_sub$bathrooms_text <- gsub("Half-bath|Shared half-bath", "0.5", Airbnb_sub$bathrooms_text)
@@ -138,8 +136,8 @@ Airbnb_sub <- Airbnb_sub |> select(-c(
 # unused variable
 "id","listing_url","scrape_id","last_scraped","source","name","description","neighborhood_overview","picture_url","host_id","host_url","host_name","host_location","host_about","host_thumbnail_url","host_picture_url","host_neighbourhood","host_listings_count","host_verifications","neighbourhood_cleansed","neighbourhood_group_cleansed","bathrooms","calendar_updated","calendar_last_scraped","first_review","last_review","license",
 
-#transforment variables                                      
-"host_since","host_response_time","host_response_rate","host_acceptance_rate", "host_is_superhost","neighbourhood", "latitude", "longitude","property_type", "bathrooms_text" , "amenities","price"))
+#transformed variables                                      
+"host_since","host_response_time","host_response_rate","host_acceptance_rate", "host_is_superhost","neighbourhood", "latitude", "longitude" ,"property_type","room_type", "bathrooms_text" , "amenities","price"))
 
 ```
 
@@ -154,6 +152,7 @@ print(colSums(is.na(Airbnb_sub)))
 ```
 
 ```{r}
+
 # beds
 #In the case of records with NA in the 'beds' field, we observe that the majority are campsites, so we will consider 'beds = 0' for these cases.
 
@@ -163,7 +162,6 @@ Airbnb_sub$beds <- ifelse(is.na(Airbnb_sub$beds), 0, Airbnb_sub$beds)
 #In the case of our variable price_numeric, we are going to remove the records with n = 0 since it is our dependent variable
 
 Airbnb_sub <- Airbnb_sub[!is.na(Airbnb_sub$price_numeric), ]
-
 
 ```
 
@@ -190,7 +188,11 @@ write.csv(Airbnb_sub, here::here("Airbnb_sub.csv"), row.names = FALSE)
 
 ```
 
-## Introduction
+# Airbnb Price Regression Modeling
+
+Bárbara Flores
+
+### Introduction
 
 The objective of this project is to generate a model that allows setting prices for Airbnb ads in Asheville, North Carolina.
 
@@ -201,5 +203,37 @@ To develop a model that enables us to set prices for Airbnb ads in Asheville, we
 ### Linear regression
 
 Linear regression is a statistical technique used to model the relationship between a dependent variable and one or more independent variables. In this context, the dependent variable would be the price of Airbnb ads, while independent variables may include features such as the number of rooms, amenities, number of bathrooms, and property location, among others.
+
+### Conclusion
+
+throomthroom
+
+{{< pagebreak >}}
+
+# Airbnb Price Regression Modeling
+
+Bárbara Flores
+
+### Introduction
+
+The objective of this project is to generate a linear regression model that allows setting prices for Airbnb ads in Asheville, North Carolina.
+
+### Dataset
+
+We have a database of various Airbnb rental listings in the city, obtained through web scraping, which contains detailed information about the listings, such as price, number of rooms, amenities, number of bathrooms, property location, etc. The original database includes **75 variables**. This dataset was extracted in June 2023 by the company Inside Airbnb and contains information about **3239** rental listings in Asheville, North Carolina. Therefore, the conclusions drawn are based on this time period.
+
+The database and dictionary can be downloaded from [listings.csv](https://anlane611.github.io/ids702-fall23/DAA/listings.csv) and [Inside Airbnb Data Dictionary](https://docs.google.com/spreadsheets/d/1iWCNJcSutYqpULSQHlNyGInUvHg2BoUGoNRIGa6Szc4/edit#gid=1322284596)
+
+### Data Cleaning
+
+First, the database was cleaned to be used for a linear regression model. Variables that did not contribute information to the model were excluded, such as: "id", "listing_url", "scrape_id", "last_scraped", "source", "name", "description", "neighborhood_overview", "picture_url"," host_id", "host_url", "host_name", "host_location", "host_about", etc.
+
+Secondly, certain transformations were performed on some variables to handle them within the model, such as "host_response_time", "host_response_rate", "host_acceptance_rate", "host_is_superhost", "neighbourhood", "latitude", "longitude" ,"property_type", "room_type", "bathrooms_text", "amenities" and "price".
+
+It is worth mentioning that the **'amenities'** variable considered combinations of 2115 different amenities, so the following transformation was performed: new binary variables were generated to group the most frequent amenities. For example, **'security'** considers 'smoke and fire alarms', 'fire extinguisher', and 'first aid kit'. **'kitchen_amenities'** includes 'dishes and silverware', 'microwave', 'kitchen', 'refrigerator', 'cooking basics', 'coffee', 'freezer', 'wine glasses', 'oven', 'toaster', and 'dining table'."
+
+{{< pagebreak >}}
+
+### Conclusion
 
 ### Conclusion
