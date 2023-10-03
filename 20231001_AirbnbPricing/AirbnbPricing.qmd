@@ -177,12 +177,8 @@ summary(model1)
 # Price transformation using logarithm is performed, as the QQ plot exhibited a systematic deviation between the theoretical distribution and the actual distribution of the data. This could stem from both the non-normality of the residuals and heteroscedasticity.
 model2 <- lm(log_price ~ entire_home_apt + bedrooms + bathrooms_numeric + dist_to_dt + entertainment  + climate_control + accommodates , data = Airbnb_sub)
 summary(model2)
-```
 
-```{r, echo=FALSE}
-#par(mfcol = c(1, 2))
-#plot(model1, which = 2, main = "Model 1: using price")
-#plot(model2, which = 2, main = "Model 2: using log(price)")
+cat("Mean Squared Error:", mean(summary(model2)$residuals^2))
 ```
 
 # Airbnb Price Regression Modeling - **Report for** Airbnb executives
@@ -233,23 +229,23 @@ grid.arrange(scatter_plot_dist, scatter_plot_accommodates, scatter_plot_bathroom
 
 ### Methods
 
-After data cleaning, variable consideration, and iterative model refinement, we developed a linear regression model for Airbnb pricing. Missing data were addressed through decision rules, resulting in a final database of 2,745 rows from the original 3,239.
+After data cleaning, variable consideration, and iterative model refinement, we developed a linear regression model for Airbnb pricing. Missing data were addressed through decision rules, resulting in a final database of 2,243 rows from the original 3,239.
 
 ### Results
 
 The final model obtained is the following:
 
-*ln(price) = 3.743 + 0.129\*(is entire home apt) + 0.082\*(n° bedrooms) + 0.142\*(n° bathrooms) - 0.048\*(dist to downtown) + 0.192\*(has entertainment amenities) + 0.443\*(has climate control) + 0.07\*(n°accommodates)*
+*ln(price) = 3.74+ 0.13\*(is entire home apt) + 0.08\*(n° bedrooms) + 0.14\*(n° bathrooms) - 0.05\*(dist to downtown) + 0.19\*(has entertainment amenities) + 0.44\*(has climate control) + 0.07\*(n°accommodates)*
 
 The coefficient accompanying a variable in a linear regression is the amount by which the response variable (dependent variable) changes for each one-unit change in the predictor variable (independent variable), while keeping all other variables constant. For example, one would expect that, on average, for each additional room, the logarithm of the price would increase by 0.082.
 
 If we were in the situation of defining the price of a new property, we should evaluate the variables of that property in the model. For example, let's assume we have a rental in Asheville, which is an entire home apartment (coded as 1), has 3 bedrooms, 1 bathroom, is located 3 miles from downtown, lacks a TV, Netflix, or any entertainment amenities (codes as 0), has air conditioning (coded as 1), and can accommodate 5 guests. Finally, we could predict a price as follows:
 
-*ln(price) = 3.743 + 0.129\*(1) + 0.082\*(3) + 0.142\*(1) - 0.048\*(3) + 0.192\*(0) + 0.443\*(1) + 0.07\*(5) = 4.909*
+*ln(price) = 3.74+ 0.13\*(1) + 0.08\*(3) + 0.14\*(1) - 0.05(3) + 0.19\*(0) + 0.44\*(1) + 0.07\*(5) = 4.893*
 
-*price = e\^4.909 = 135.5*
+*price = e\^4.893= 133*
 
-So, a suggested price for this rental is \$136 per night
+So, a suggested price for this rental is \$133 per night
 
 A measure obtained from our model is an R² of 0.52, which means that approximately 52% of the variability in the rental prices in Assville can be explained by the variables included in our model.
 
@@ -267,84 +263,85 @@ The objective of this project is to generate a linear regression model that allo
 
 **Dataset**
 
-We have a database of various Airbnb rental listings in the city, obtained through web scraping, which contains detailed information about the listing. The original database includes **75 variables**. This dataset was extracted in June 2023 by the company Inside Airbnb and contains information about **3239** rental listings in Asheville, North Carolina. Therefore, the conclusions drawn are based on this time period. The database and dictionary can be downloaded from [listings.csv](https://anlane611.github.io/ids702-fall23/DAA/listings.csv) and [Inside Airbnb Data Dictionary](https://docs.google.com/spreadsheets/d/1iWCNJcSutYqpULSQHlNyGInUvHg2BoUGoNRIGa6Szc4/edit#gid=1322284596)
+We have a database of various Airbnb rental listings in the city, obtained through web scraping, which contains detailed information about the listing. The original database includes **75 variables**. This dataset was extracted in June 2023 by the company Inside Airbnb and contains information about **3,239** rental listings in Asheville, North Carolina. Therefore, the conclusions drawn are based on this time period. The database and dictionary can be downloaded from [listings.csv](https://anlane611.github.io/ids702-fall23/DAA/listings.csv) and [Inside Airbnb Data Dictionary](https://docs.google.com/spreadsheets/d/1iWCNJcSutYqpULSQHlNyGInUvHg2BoUGoNRIGa6Szc4/edit#gid=1322284596)
 
 **Data cleaning**
 
-First, the database was cleaned to be used for a linear regression model. Variables that did not contribute information to the model were excluded, such as: *"id", "listing_url", "scrape_id", "last_scraped", "source", "name", "description", "neighborhood_overview", "picture_url"," host_id",* etc.
+-   First, the database was cleaned to be used for a linear regression model. Variables that did not contribute information to the model were excluded, such as: *"id", "listing_url", "scrape_id", "last_scraped", "source", "name", "description", "neighborhood_overview", "picture_url"," host_id",* etc.
 
-Secondly, certain transformations were performed on some variables to handle them within the model, such as *"host_response_time", "host_response_rate", "host_acceptance_rate", "host_is_superhost", "neighbourhood", "latitude", "longitude" ,"property_type", "room_type", "bathrooms_text", "amenities"* and *"price".*
+-   Secondly, certain transformations were performed on some variables to handle them within the model, such as *"host_response_time", "host_response_rate", "host_acceptance_rate", "host_is_superhost", "neighbourhood", "latitude", "longitude" ,"property_type", "room_type", "bathrooms_text", "amenities"* and *"price".*
 
-It is worth mentioning that the ***'amenities'*** variable considered combinations of 2115 different features, so the following transformation was performed: new binary variables were generated to group the most frequent amenities. For example, ***'security'*** considers *'smoke and fire alarms', 'fire extinguisher', and 'first aid kit'. **'kitchen_amenities'** includes 'dishes and silverware', 'microwave', 'kitchen', 'refrigerator', 'cooking basics', 'coffee', 'freezer', 'wine glasses', 'oven', 'toaster', and 'dining table'."*
+-   It is worth mentioning that the ***'amenities'*** variable considered combinations of 2,115 different features, so the following transformation was performed: new binary variables were generated to group the most frequent amenities. For example, ***'security'*** considers *'smoke and fire alarms', 'fire extinguisher', and 'first aid kit'. **'kitchen_amenities'** includes 'dishes and silverware', 'microwave', 'kitchen', 'refrigerator', 'cooking basics', 'coffee', 'freezer', 'wine glasses', 'oven', 'toaster', and 'dining table'."*
 
-Some variables underwent treatment for missing values, for instance, in the 'beds' variable. For records with NA in the 'beds' field, we observed that the majority represent campsites; therefore, we will consider 'beds = 0' for these instances. In other cases, rows with missing values were simply removed. The final model, as a result, incorporated 2,745 out of the original 3,239 rows.
+-   Certain variables were handled for missing values, such as in the case of the 'beds' variable. For records with NA in the 'beds' field, we observed that the majority represent campsites; therefore, we will consider 'beds = 0' for these instances. In other cases, rows with missing values were simply removed. The final model, as a result, incorporated 2,243 out of the original 3,239 rows.
 
 {{< pagebreak >}}
 
 ### Methods
 
-After data cleaning, various models were iteratively built based on different performance metrics. In particular, the following explanatory variables were considered as a foundation:
+-   After data cleaning, the following explanatory variables were considered as a foundation:
 
--   Room type (which was transformed into the binary variable '**entire_home_apt**' )
+    -   Room type (Transformed into the binary variable '**entire_home_apt**' )
 
--   Number of bedrooms.
+    -   Number of bedrooms.
 
--   Distance to downtown.
+    -   Distance to downtown.
 
--   Amenities, which, as mentioned earlier, were categorized into the following binary variables: *("security", "essentials", "kitchen amenities", "entertainment", "bedroom amenities", "work", "parking", "toiletries", "climate control", "convenience features")*
+    -   Amenities, which, as mentioned earlier, were categorized into binary variables.
 
-Additionally, other variables were taken into consideration to include in the model. Factors appropriate for a new host to set a price were considered. In this context, and thinking about new hosts, variables such as *"review scores"* or *"number of reviews"* will not be considered, as we are focusing on a new listing that has not yet been evaluated by customers.
+-   Additional variables were considered for the model, focusing on factors relevant to new hosts for price determination. Variables like *"review scores" or "superhost status"* were omitted, given the emphasis on new, unrated listings or hosts new to the platform.
 
-### Results
+-   Also, interactions were not considered in the model to enhance its interpretability.
 
-```{r, results = TRUE}
-tab_model(model1)
+-   Examined correlations using plots; removed highly correlated variables. For instance, "accommodates" strongly correlates with "n° of beds"; only "accommodates" remained.
 
-```
+-   The binary amenities variables "*security", "essentials", "bedroom amenities", "convenience features", "kitchen amenities"* and *"toiletries"* proved to be less significant in predicting the price, and thus, they were removed.
 
-```{r, results = TRUE}
+-   In the final model, logarithmic transformation of the price was performed, as the QQ plot exhibited a systematic deviation between the theoretical distribution and the actual distribution of the data. This could result from both the non-normality of the residuals and heteroscedasticity.
+
+```{r, results = TRUE, fig.height= 3, fig.width= 6 }
 par(mfcol = c(1, 2))
-plot(model1, which = 2, main = "Model 1: using price")
-plot(model2, which = 2, main = "Model 2: using log(price)")
-
+plot(model1, which = 2, main = "Model 1: using price", cex.main = 0.8)  
+plot(model2, which = 2, main = "Model 2: using log(price)", cex.main = 0.8)  
 ```
 
 {{< pagebreak >}}
 
--   The binary variables "*security", "essentials", "bedroom amenities", "convenience features", "kitchen amenities"* and *"toiletries"* proved to be less significant in predicting the price, and thus, they were removed
-
--   Price transformation using logarithm is performed, as the QQ plot exhibited a systematic deviation between the theoretical distribution and the actual distribution of the data. This could stem from both the non-normality of the residuals and heteroscedasticity.
-
 After several iterations, the finally selected model was:
 
-*ln(price) = 3.743 + 0.129\*(is entire home apt) + 0.082\*(n° bedrooms) + 0.142\*(n° bathrooms) - 0.048\*(dist to downtown) + 0.192\*(has entertainment amenities) + 0.443\*(has climate control) + 0.07\*(n°accommodates)*
+*ln(price) = 3.74+ 0.13\*(is entire home apt) + 0.08\*(n° bedrooms) + 0.14\*(n° bathrooms) - 0.05\*(dist to downtown) + 0.19\*(has entertainment amenities) + 0.44\*(has climate control) + 0.07\*(n°accommodates)*
 
 The details of the coefficients and statistics obtained with this model are as follows:
 
-```{r results=TRUE}
-print(summary(model2)$coefficients)
-
-model_summary <- summary(model2)
-cat("R-squared:", model_summary$r.squared, "\n")
-cat("Mean Squared Error:", mean(model_summary$residuals^2), "\n")
+```{r, results = TRUE}
+tab_model(model2)
 ```
 
-In general, the model explains approximately 47.28% of the variability in the logarithm of the price. The F-statistic and p-value suggest that the model is statistically significant. Additionally, the coefficients have small p-values, indicating that they are statistically significant.
+F-statistic: 351.5 on 7 and 2235 DF, p-value: \< 2.2e-16
 
-The Mean Squared Error (MSE) of 0.1557079 suggests that, on average, the predictions of the regression model exhibit a relatively low mean squared error, indicating a reasonable level of accuracy. In the context of model evaluation, this MSE is considered relatively good, signifying that the model performs well in minimizing prediction errors.
 
-If we calculate the Variance Inflation Factor (VIF) for our model, we obtain the following:
+Mean Squared Error: 0.1494199
+
+-   In general, the model explains approximately 52% of the variability in the logarithm of the price. The F-statistic and p-value suggest that the model is statistically significant. Additionally, the coefficients have small p-values, indicating that they are statistically significant.
+
+-   The Mean Squared Error (MSE) of 0.15 suggests that, on average, the predictions of the regression model exhibit a relatively low mean squared error, indicating a reasonable level of accuracy. In the context of model evaluation, this MSE is considered relatively good, signifying that the model performs well in minimizing prediction errors.
+
+-   If we calculate the Variance Inflation Factor (VIF) for our model, we obtain the following:
 
 ```{r results=TRUE}
 print(vif(model2))
 ```
 
-Most variables in the model exhibit VIF values near 1, indicating no major multicollinearity concerns. Although variables like "bedrooms" and "accommodates" have slightly higher VIF values (around 1.016), they are within an acceptable range. Overall, low VIF values enhance the stability and interpretability of the regression model by suggesting weak correlations between variables.
+-   VIF measures the degree to which the variance of an estimated regression coefficient is inflated due to multicollinearity with other predictors. VIF values close to 1 indicate minimal multicollinearity, while values exceeding 5 suggest a moderate to high level. In this context, variables such as *"entire home apt", "dist to dt", "entertainment", and "climate_control"* exhibit minimal multicollinearity with VIFs less than 5, implying stable regression coefficients. Conversely, variables like *"bedrooms"* and *"accommodates"* show moderate multicollinearity. However, the decision was made to retain both variables as both are theoretically expected to influence the rental price.
 
 ### Conclusion
 
--   Considering the task of helping new hosts set prices for Airbnb listings in Asheville, NC, falls more into the category of a **Prediction Problem.** The primary goal is to build a model that can accurately predict or generate prices for Airbnb listings based on various factors. We want to provide hosts with a tool that can predict the optimal price for their listings rather than drawing in-depth inferences about the underlying relationships between variables.
+-   Considering the task of helping new hosts set prices for Airbnb listings in Asheville, NC, falls more into the category of a **Prediction Problem.** The primary goal is to build a model that can accurately predict or generate prices for Airbnb listings based on various factors. We want to provide hosts with a tool that can predict the optimal price for their listings rather than drawing in-depth inferences about the underlying relationships between variables. However, this model is also useful for explaining some of the variables that have a significant impact on the determination of the price, even though its primary goal is predictive.
+
 -   The price is transformed using a logarithm due to a systematic deviation observed in the QQ plot between the theoretical distribution and the actual distribution of the data.
--   The VIF values assess multicollinearity among predictor variables in a regression model. Values close to 1 indicate low correlation with other predictors, which is acceptable. Most variables in the model exhibit VIF values near 1, indicating no major multicollinearity concerns.
--   A key metric for evaluating the model's performance is the Mean Squared Error (MSE). In summary, the model demonstrates a satisfactory level of accuracy, evidenced by a relatively low MSE. The successful minimization of prediction errors highlights commendable performance, aligning with expectations.
--   Generally, we can consider this to be a valid model for predicting or determining the price of a home in Asheville, given its low multicollinearity, statistical significance of the model, significance of its variables, and the associated MSE (mean squared error).
+
+-   Examined correlations using plots; removed highly correlated variables. For instance, "accommodates" strongly correlates with "n° of beds"; only "accommodates" remained. Finally, an acceptable VIF was obtained where the values of your variables were close to 5 or lower.
+
+-   A key metric for evaluating the model's performance is the Mean Squared Error (MSE). In summary, the model demonstrates a satisfactory level of accuracy, evidenced by a relatively low MSE. The successful minimization of prediction errors highlights commendable performance, aligning with expectations. According to R2, the model explains approximately 52% of the variability in the logarithm of the price.
+
+-   Generally, we can consider this to be a valid model for predicting or determining the price of a home in Asheville, given its low multicollinearity, statistical significance of the model, significance of its variables, and the associated MSE (mean squared error).However, It is important to consider that other factors may be explaining the rental price, and here we are bound by our original database. With our model, we were only able to explain 52% of the variance, However, it can still be useful as a guide if our goal is to determine the listing price for a new rental on Airbnb.
