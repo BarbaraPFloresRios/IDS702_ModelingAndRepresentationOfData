@@ -4,4 +4,5 @@ This repository contains the following projects developed in the 'Modeling and R
 
 For more information about the course, please visit the course website: [IDS702 - Modeling and Representation of Data](https://anlane611.github.io/ids702-fall23/)
 
-1. [AirbnbPricing](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/tree/main/20231001_AirbnbPricing)
+1. [Linear Regression: AirbnbPricing](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/tree/main/20231001_AirbnbPricing)
+2. [Logistic Regression: Reddit Financial Independence Survey]()
