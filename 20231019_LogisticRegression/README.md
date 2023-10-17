@@ -1,4 +1,4 @@
-# 💵  Financial Independence Survey Logistic Regression
+# 💵  Financial Independence Survey Logistic Regression Model
 ### Bárbara Flores
 
 
