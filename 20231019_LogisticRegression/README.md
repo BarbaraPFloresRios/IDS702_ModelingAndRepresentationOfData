@@ -8,11 +8,9 @@ For more details on the assigned task, you can find the instructions on the [web
 
 **Dataset**
 
-We have a database contains a subset of the official results of the 2020 Financial Independence Survey from Reddit.
-....
+This database is a subset of the official results from the 2020 Financial Independence Survey on Reddit (r/financialindependence). It includes responses only from individuals representing themselves (not other household contributors) and excludes retired individuals. The dataset comprises 1,998 rows and 65 variables, covering information such as income contributors, financial impact of the pandemic, political affiliation, demographics, financial independence details, employment status, and various financial aspects, sourced from Reddit.
+
 For more details regarding the data dictionary and source information, you can refer to the [www.openintro.org](https://www.openintro.org/data/index.php?data=reddit_finance) website.
-
-
 
 **Results**
 
