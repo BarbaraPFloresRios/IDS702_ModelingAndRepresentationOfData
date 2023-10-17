@@ -3,7 +3,7 @@
 
 The objective of this project is to generate a linear regression model that allows setting prices for Airbnb ads in Asheville, North Carolina.
 
-For more details on the assigned task, you can find them on the [website](https://anlane611.github.io/ids702-fall23/DAA/DA1.html) developed by Professor Andrea Lane for the Modeling and Representation of Data class (IDS 702) at Duke University.
+For more details on the assigned task, you can find the instructions on the [website](https://anlane611.github.io/ids702-fall23/DAA/DA1.html) developed by Professor Andrea Lane for the Modeling and Representation of Data class (IDS 702) at Duke University.
 
 **Dataset**
 
