@@ -2,4 +2,4 @@
 ### Bárbara Flores
 
 
-The objective of this project is to generate a linear
+The objective of this project is to generate a Logistic Regression Model
