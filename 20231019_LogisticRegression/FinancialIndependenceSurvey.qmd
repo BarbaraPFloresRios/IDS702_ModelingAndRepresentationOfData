@@ -1,5 +1,5 @@
 ---
-title: "Financial Independence Survey"
+title: "Financial Independence Survey - Logistic Regression Model"
 format: pdf 
 output: 
   pdf_document: 
@@ -26,3 +26,5 @@ p_load(openintro, tidyverse)
 ```{r}
 glimpse(reddit_finance)
 ```
+
+### Introduction
