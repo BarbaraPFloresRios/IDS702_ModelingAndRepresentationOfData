@@ -1,5 +1,4 @@
 ---
-title: "Financial Independence Survey - Logistic Regression Model"
 format: pdf 
 output: 
   pdf_document: 
@@ -27,4 +26,22 @@ p_load(openintro, tidyverse)
 glimpse(reddit_finance)
 ```
 
-### Introduction
+# Financial Independence Survey - Logistic Regression Model
+
+## **Overview**
+
+The objective of this project is to develop a Logistic Regression Model to address the Research Question: **What factors contribute to an individual's perception of financial independence?**
+
+To accomplish this objective, we will analyze a dataset that is a subset of the official results from the 2020 Financial Independence Survey on Reddit (r/financialindependence). This subset exclusively comprises responses from individuals representing themselves (excluding contributions from other household members) and excludes retired individuals. The dataset encompasses **1,998 rows and 65 variables**, covering information such as income contributors, the financial impact of the pandemic, political affiliation, demographics, details about financial independence, employment status, and various financial aspects. The data has been sourced from Reddit.
+
+For additional details regarding the data dictionary and source information, please refer to the [www.openintro.org](https://www.openintro.org/data/index.php?data=reddit_finance) website.
+
+## **Data cleaning**
+
+Which variables required cleaning? Are there any missing values? Did you make any assumptions during the data cleaning process?
+
+## **Modeling**
+
+## **Results**
+
+## **Future work**
