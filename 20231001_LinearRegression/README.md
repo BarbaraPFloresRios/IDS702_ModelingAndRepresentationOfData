@@ -11,4 +11,4 @@ We have a database of various Airbnb rental listings in the city, obtained throu
 
 The code was developed using the R programming language and is stored in the [AirbnbPricing.qmd](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/blob/main/20231001_LinearRegression/AirbnbPricing.qmd) file 
 
-The final deliverable report for this analysis can be found in the file: [AirbnbPricing.pdf](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/blob/main/20231001_LinearRegression/AirbnbPricing.pdf)
+The final deliverable report for this analysis can be found in the file: 📊[AirbnbPricing.pdf](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/blob/main/20231001_LinearRegression/AirbnbPricing.pdf)
