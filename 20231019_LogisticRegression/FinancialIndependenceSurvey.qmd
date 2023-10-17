@@ -12,9 +12,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results='h
 
 ```{r}
 library(pacman)
-
-p_load(openintro, tidyverse)
-
+p_load(openintro, tidyverse,dplyr)
 
 ```
 
@@ -23,7 +21,82 @@ p_load(openintro, tidyverse)
 ```
 
 ```{r}
+# Cleaning data and selecting relevant columns for predictive modeling
+#First, We created the reddit_finance dataset for easier work. 
+reddit_finance_sub <- reddit_finance 
+
+#Then, we create new variables that allow us to use the current variables in our model.
+
+#We will make some assumptions and decision rules based on criteria to clean our dataset, which we will detail in the following code:
+
+# 1. num_incomes: 
+# How many individuals contribute to your household income?
+# We have 1 record with NA, which we will replace with 0, and 2 records with n > 3, which we will replace with 4.
+
+
+reddit_finance_sub$num_incomes <- ifelse(is.na(reddit_finance_sub$num_incomes), 0, reddit_finance_sub$num_incomes)
+
+reddit_finance_sub$num_incomes <- ifelse(reddit_finance_sub$num_incomes == ">3", 4, reddit_finance_sub$num_incomes)
+
+
+reddit_finance_sub$num_incomes <- as.numeric(reddit_finance_sub$num_incomes)
+
+# 2. pan_inc_chg
+# As a result of the pandemic, did your earned income increase, decrease, or remain the same?
+
+reddit_finance_sub$pan_inc_chg <- factor(reddit_finance_sub$pan_inc_chg, levels = c( "Decreased","Stayed the same","Increased"))
+
+# 3. pan_inc_chg_pct
+# By how much did your earned income change?
+# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 1-10% will be replaced by 5%, 11-20% by 15%, and so on.
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(pan_inc_chg_pct = case_when(
+    pan_inc_chg_pct == "1-10%"  ~ 0.05,
+    pan_inc_chg_pct == "11-20%" ~ 0.15,
+    pan_inc_chg_pct == "21-30%" ~ 0.25,
+    pan_inc_chg_pct == "31-40%" ~ 0.35,
+    pan_inc_chg_pct == "41-50%" ~ 0.45,
+    pan_inc_chg_pct == "51-60%" ~ 0.55,
+    pan_inc_chg_pct == "61-70%" ~ 0.65,
+    pan_inc_chg_pct == "71-80%" ~ 0.75,
+    pan_inc_chg_pct == "81-90%" ~ 0.85,
+    pan_inc_chg_pct == "91-100%" ~ 0.95,
+    pan_inc_chg_pct == "No change" ~ 0,
+    TRUE ~ as.numeric(pan_inc_chg_pct)  
+  ))
+
+
+reddit_finance_sub$pan_inc_chg_pct <- as.numeric(reddit_finance_sub$pan_inc_chg_pct)
+
+# 4.pan_exp_chg
+#As a result of the pandemic, did your expenses increase, decrease, or remain the same?
+
+reddit_finance_sub$pan_exp_chg <- factor(reddit_finance_sub$pan_exp_chg, levels = c( "Decreased","Stayed the same", "Increased"))
+
+```
+
+```{r}
+count_table <- reddit_finance_sub %>%
+  count(pan_exp_chg)
+
+# Imprime la tabla de conteo
+count_table
+```
+
+```{r}
+summary(reddit_finance_sub)
+```
+
+```{r}
+```
+
+```{r}
 glimpse(reddit_finance)
+```
+
+```{write.csv(reddit_finance, file = "mi_archivo.csv", row.names = FALSE)}
+
 ```
 
 # Financial Independence Survey - Logistic Regression Model
