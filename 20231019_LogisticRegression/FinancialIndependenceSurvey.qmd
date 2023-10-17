@@ -1,26 +1,28 @@
 ---
-title: "FinancialIndependenceSurvey"
-format: html
-editor: visual
+title: "Financial Independence Survey"
+format: pdf 
+output: 
+  pdf_document: 
+  latex_engine: xelatex
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
+```{r, include = FALSE}
+# Global settings to hide code and results in the final document
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results='hide')
 ```
 
-You can add options to executable code like this
-
 ```{r}
-#| echo: false
-2 * 2
+library(pacman)
+
+p_load(openintro, tidyverse)
+
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+ data("reddit_finance")
+```
+
+```{r}
+glimpse(reddit_finance)
+```
