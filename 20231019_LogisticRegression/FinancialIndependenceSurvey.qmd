@@ -74,11 +74,73 @@ reddit_finance_sub$pan_inc_chg_pct <- as.numeric(reddit_finance_sub$pan_inc_chg_
 
 reddit_finance_sub$pan_exp_chg <- factor(reddit_finance_sub$pan_exp_chg, levels = c( "Decreased","Stayed the same", "Increased"))
 
+# 5.pan_exp_chg_pct
+#By how much did your expenses change?
+# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 1-10% will be replaced by 5%, 11-20% by 15%, and so on.
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(pan_exp_chg_pct = case_when(
+    pan_exp_chg_pct == "1-10%"  ~ 0.05,
+    pan_exp_chg_pct == "11-20%" ~ 0.15,
+    pan_exp_chg_pct == "21-30%" ~ 0.25,
+    pan_exp_chg_pct == "31-40%" ~ 0.35,
+    pan_exp_chg_pct == "41-50%" ~ 0.45,
+    pan_exp_chg_pct == "51-60%" ~ 0.55,
+    pan_exp_chg_pct == "61-70%" ~ 0.65,
+    pan_exp_chg_pct == "71-80%" ~ 0.75,
+    pan_exp_chg_pct == "81-90%" ~ 0.85,
+    pan_exp_chg_pct == "91-100%" ~ 0.95,
+    pan_exp_chg_pct == "No change" ~ 0,
+    TRUE ~ as.numeric(pan_exp_chg_pct)  
+  ))
+
+
+reddit_finance_sub$pan_exp_chg_pct <- as.numeric(reddit_finance_sub$pan_exp_chg_pct)
+
+# 6. pan_fi_chg
+# As a result of the pandemic, did your FI (financially independent) number...
+
+reddit_finance_sub$pan_fi_chg <- factor(reddit_finance_sub$pan_fi_chg, levels = c( "Decrease","No change", "Increase"))
+
+# 7.pan_ret_date_chg
+# As a result of the pandemic, did your planned RE (retirement) date...
+
+reddit_finance_sub$pan_ret_date_chg <- factor(reddit_finance_sub$pan_ret_date_chg, levels = c( "Become later", "No change", "Become sooner"))
+
+# 8. pan_financial_impact
+#Overall, how would you characterize the pandemic's impact on your finances?
+
+reddit_finance_sub$pan_financial_impact <- factor(reddit_finance_sub$pan_financial_impact, levels = c( "Negative", "Neutral", "Positive"))
+
+#9. political
+#With which political party do you most closely identify? You do not need to be registered with a party to select it, answer based on your personal views.
+
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(political_grouped = case_when(
+    political %in% c("Democrat", "Libertarian Party", "Republican") ~ as.character(political),
+    TRUE ~ "Other"
+  ))
+
+reddit_finance_sub$political_grouped <- as.factor(reddit_finance_sub$political_grouped)
+
+#10. race_eth
+# What is your race/ethnicity? Select all that apply.
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(race_eth_grouped = case_when(
+    race_eth %in% c("N/A", "NA", "Decline to state") ~ NA_character_,
+    TRUE ~ as.character(race_eth)
+  ))
+
+reddit_finance_sub$race_eth_grouped <- as.factor(reddit_finance_sub$race_eth_grouped)
+
+
 ```
 
 ```{r}
 count_table <- reddit_finance_sub %>%
-  count(pan_exp_chg)
+  count(race_eth_grouped)
 
 # Imprime la tabla de conteo
 count_table
