@@ -9,6 +9,8 @@ For more details on the assigned task, you can find the instructions on the [web
 **Dataset**
 
 We have a database contains a subset of the official results of the 2020 Financial Independence Survey from Reddit.
+....
+For more details regarding the data dictionary and source information, you can refer to the [www.openintro.org](https://www.openintro.org/data/index.php?data=reddit_finance) website.
 
 
 
