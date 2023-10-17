@@ -1,4 +1,4 @@
-# Airbnb Price Regression Modeling
+# 🏠 Airbnb Price Regression Modeling
 ### Bárbara Flores
 
 The objective of this project is to generate a linear regression model that allows setting prices for Airbnb ads in Asheville, North Carolina.
