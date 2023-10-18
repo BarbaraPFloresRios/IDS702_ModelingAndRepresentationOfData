@@ -135,12 +135,82 @@ reddit_finance_sub <- reddit_finance_sub %>%
 
 reddit_finance_sub$race_eth_grouped <- as.factor(reddit_finance_sub$race_eth_grouped)
 
+# 11. gender
+# What is your gender?
+
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(gender_grouped = case_when(
+    tolower(gender) %in% c("decline to state", "n/a", "na") ~ NA_character_,
+    tolower(gender) %in% c("non-binary") ~ "Non-Binary",
+    TRUE ~ as.character(gender)
+  ))
+
+reddit_finance_sub$gender_grouped <- as.factor(reddit_finance_sub$gender_grouped)
+
+
+# 12 age
+# What is your age?
+# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 18-23 will be replaced by 21, 24-28 by 26, and so on.
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(age = case_when(
+    age %in% c("<18", "N/A", "NA") ~ NA_real_,
+    age == "18-23" ~ 21,
+    age == "24-28" ~ 26,
+    age == "29-33" ~ 31,
+    age == "34-38" ~ 36,
+    age == "39-43" ~ 41,
+    age == "44-48" ~ 46,
+    age == "49-53" ~ 51,
+    age == "54-58" ~ 56,
+    age == "59-63" ~ 61,
+    TRUE ~ as.numeric(age)
+  ))
+
+reddit_finance_sub$age <- as.numeric(reddit_finance_sub$age)
+
+#edu
+#What is the highest level of education you have completed?
+#"For the case of the education variable, we grouped its values into broader categories."
+
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(edu_grouped = case_when(
+    edu %in% c("High School diploma / GED", "Less than high school", "Some high school") ~ "High School or Less",
+    edu %in% c("Some college, no degree", "Trade School Degree") ~ "Some College or Trade School",
+    edu %in% c("Associate's Degree", "Bachelor's Degree") ~ "Bachelor's or Associate's Degree",
+    edu %in% c("Doctorate / Post Graduate", "Doctorate / Post-Graduate", "Graduate degree") ~ "Doctorate or Master's Degree",
+    edu %in% c("N/A", "NA") ~ NA_character_,
+    TRUE ~ as.character(edu)
+  ))
+
+
+edu_levels <- c("High School or Less", "Some College or Trade School", "Bachelor's or Associate's Degree",   "Doctorate or Master's Degree")
+reddit_finance_sub$edu_grouped <- factor(reddit_finance_sub$edu_grouped, levels = edu_levels)
+
+
+#rel_status
+#What is your relationship status?
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(rel_status_grouped = case_when(
+    rel_status %in% c("Divorced", "Divorced - Remarried") ~ "Divorced or Remarried",
+    rel_status %in% c("In a relationship, but not married", "Married", "Widowed", "Widowed - Remarried") ~ "Married or In a Relationship",
+    rel_status %in% c("Single, never married") ~ "Single, Never Married",
+    rel_status %in% c("N/A", "NA") ~ NA_character_,
+    TRUE ~ as.character(rel_status)
+  )) %>%
+  mutate(rel_status_grouped = as.factor(rel_status_grouped))
+
+
+
+
 
 ```
 
 ```{r}
 count_table <- reddit_finance_sub %>%
-  count(race_eth_grouped)
+  count(rel_status_grouped)
 
 # Imprime la tabla de conteo
 count_table
