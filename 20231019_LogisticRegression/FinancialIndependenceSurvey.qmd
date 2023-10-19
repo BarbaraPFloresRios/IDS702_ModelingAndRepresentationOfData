@@ -405,13 +405,16 @@ variables_to_replace <- c(
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate_at(vars(variables_to_replace), list(~replace_na(., 0)))
 
+# Deleting outliers
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(cash = ifelse(cash >= 4500000.00, NA, cash))
 
 #"Since there are many variables related to income or assets, debts, and expenses, we will create 3 variables that sum these individual items: total_debts, total_assets, and total_expenses
 
 #total_assets
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(total_assets = rowSums(select(., 
-    c("home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val","2020_invst_save"))))
+    c("home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val"))))
 
 #total_debts
 reddit_finance_sub <- reddit_finance_sub %>%
@@ -424,70 +427,28 @@ reddit_finance_sub <- reddit_finance_sub %>%
     c("2020_housing_exp", "2020_utilities_exp", "2020_transp_exp", "2020_necessities_exp", "2020_lux_exp", "2020_child_exp","2020_debt_repay", "2020_charity", "2020_healthcare_exp","2020_taxes", "2020_edu_exp", "2020_other_exp"))))
 
 # We finally removed some previously transformed variables that we will not be using in their original form.
-reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("political", "race_eth", "gender", "edu", "rel_status", "children","country", "industry","ne_status", "home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val","student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt","2020_housing_exp","2020_utilities_exp","2020_transp_exp","2020_necessities_exp","2020_lux_exp","2020_child_exp","2020_debt_repay","2020_invst_save","2020_charity","2020_healthcare_exp","2020_taxes","2020_edu_exp","2020_other_exp"))]
-```
-
-```{r}
-count_table <- reddit_finance_sub %>%
-  count(`fin_indy`)
+reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("political", "race_eth", "gender", "edu", "rel_status", "children","country", "industry","ne_status", "home_value","brokerage_accts_tax","retirement_accts_tax", "cash", "invst_accts","spec_crypto","invst_prop_bus_own","other_val","student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt","2020_housing_exp","2020_utilities_exp","2020_transp_exp","2020_necessities_exp","2020_lux_exp","2020_child_exp","2020_debt_repay","2020_charity","2020_healthcare_exp","2020_taxes","2020_edu_exp","2020_other_exp"))]
 ```
 
 ```{r}
 logistic_mod <- glm(fin_indy ~ 
-  age
-  
-  +total_debts
-  +total_assets
-  +total_expenses+`2020_gross_inc`,
-  data=reddit_finance_sub,
-  family="binomial")
-summary(logistic_mod)
-```
-
-```{r}
-logistic_mod <- glm(fin_indy ~ 
-+num_incomes
-+pan_inc_chg
-+pan_inc_chg_pct
-+pan_exp_chg
-+pan_exp_chg_pct
-+pan_fi_chg
-+pan_ret_date_chg
-+pan_financial_impact
+age
 +political_grouped
-+race_eth_grouped
-+gender_grouped
-+age
-+edu_grouped
-+rel_status_grouped
-+children_grouped
-+country_grouped
-+fin_indy_num
-+fin_indy_pct
-+retire_invst_num
-+tgt_sf_wthdrw_rt
-+max_retire_sup
-+retire_exp
-+whn_fin_indy_num
-+fin_indy_lvl
-+retire_age
-+stp_whn_fin_indy
-+industry_grouped
-+employer
-+role
-+ft_status
-+pt_status
-+gig_status
-+edu_status
 +housing
 +total_debts
 +total_assets
 +total_expenses
 +`2020_gross_inc`
-,
-  data=reddit_finance_sub,
++`2020_invst_save`
+  ,data=reddit_finance_sub,
   family="binomial")
 summary(logistic_mod)
+```
+
+```{r}
+# Supongamos que tu data frame se llama 'mi_data' y quieres guardarlo como un archivo CSV llamado 'mi_archivo.csv'
+write.csv(reddit_finance_sub, file = "mi_archivo.csv", row.names = FALSE)
+
 ```
 
 # Financial Independence Survey - Logistic Regression Model
@@ -499,26 +460,6 @@ The objective of this project is to develop a Logistic Regression Model to addre
 **What factors contribute to an individual's perception of financial independence?**
 
 To accomplish this objective, we will analyze a dataset that is a subset of the official results from the 2020 Financial Independence Survey on Reddit (r/financialindependence). This subset exclusively comprises responses from individuals representing themselves (excluding contributions from other household members) and excludes retired individuals. The dataset encompasses 1,998 rows and 65 variables, covering information such as income contributors, the financial impact of the pandemic, political affiliation, demographics, details about financial independence, employment status, and various financial aspects. The data has been sourced from Reddit.
-
-\| \| \|
-
-\|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--\|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--\|
-
-\| \*\*Total Observations (N)\*\* \| 1000 \|
-
-\| \*\*Total Variables (N)\*\* \| 50 \|
-
-\| \*\*Numeric variables\*\* \| \|
-
-\| - Discrete variables \| 20 \|
-
-\| - Continuous variables \| 30 \|
-
-\| \*\*Categorical variables\*\* \| \|
-
-\| - Nominal variables \| 15 \|
-
-\| - Ordinal variables \| 10 \|
 
 For additional details regarding the data dictionary and source information, please refer to the [www.openintro.org](https://www.openintro.org/data/index.php?data=reddit_finance) website.
 
