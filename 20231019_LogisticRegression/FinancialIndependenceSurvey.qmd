@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results='h
 
 ```{r}
 library(pacman)
-p_load(openintro, tidyverse,dplyr)
+p_load(openintro, tidyverse,dplyr,tidyr)
 
 ```
 
@@ -22,12 +22,12 @@ p_load(openintro, tidyverse,dplyr)
 
 ```{r}
 # Cleaning data and selecting relevant columns for predictive modeling
-#First, We created the reddit_finance dataset for easier work. 
+# First, We created the reddit_finance dataset for easier work. 
 reddit_finance_sub <- reddit_finance 
 
-#Then, we create new variables that allow us to use the current variables in our model.
+# Then, we create new variables that allow us to use the current variables in our model.
 
-#We will make some assumptions and decision rules based on criteria to clean our dataset, which we will detail in the following code:
+# We will make some assumptions and decision rules based on criteria to clean our dataset, which we will detail in the following code:
 
 # 1. num_incomes: 
 # How many individuals contribute to your household income?
@@ -70,12 +70,12 @@ reddit_finance_sub <- reddit_finance_sub %>%
 reddit_finance_sub$pan_inc_chg_pct <- as.numeric(reddit_finance_sub$pan_inc_chg_pct)
 
 # 4.pan_exp_chg
-#As a result of the pandemic, did your expenses increase, decrease, or remain the same?
+# As a result of the pandemic, did your expenses increase, decrease, or remain the same?
 
 reddit_finance_sub$pan_exp_chg <- factor(reddit_finance_sub$pan_exp_chg, levels = c( "Decreased","Stayed the same", "Increased"))
 
 # 5.pan_exp_chg_pct
-#By how much did your expenses change?
+# By how much did your expenses change?
 # For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 1-10% will be replaced by 5%, 11-20% by 15%, and so on.
 
 reddit_finance_sub <- reddit_finance_sub %>%
@@ -112,8 +112,8 @@ reddit_finance_sub$pan_ret_date_chg <- factor(reddit_finance_sub$pan_ret_date_ch
 
 reddit_finance_sub$pan_financial_impact <- factor(reddit_finance_sub$pan_financial_impact, levels = c( "Negative", "Neutral", "Positive"))
 
-#9. political
-#With which political party do you most closely identify? You do not need to be registered with a party to select it, answer based on your personal views.
+# 9. political
+# With which political party do you most closely identify? You do not need to be registered with a party to select it, answer based on your personal views.
 
 
 reddit_finance_sub <- reddit_finance_sub %>%
@@ -124,7 +124,7 @@ reddit_finance_sub <- reddit_finance_sub %>%
 
 reddit_finance_sub$political_grouped <- as.factor(reddit_finance_sub$political_grouped)
 
-#10. race_eth
+# 10. race_eth
 # What is your race/ethnicity? Select all that apply.
 
 reddit_finance_sub <- reddit_finance_sub %>%
@@ -169,8 +169,8 @@ reddit_finance_sub <- reddit_finance_sub %>%
 
 reddit_finance_sub$age <- as.numeric(reddit_finance_sub$age)
 
-#edu
-#What is the highest level of education you have completed?
+# 13. edu
+# What is the highest level of education you have completed?
 #"For the case of the education variable, we grouped its values into broader categories."
 
 
@@ -189,61 +189,400 @@ edu_levels <- c("High School or Less", "Some College or Trade School", "Bachelor
 reddit_finance_sub$edu_grouped <- factor(reddit_finance_sub$edu_grouped, levels = edu_levels)
 
 
-#rel_status
-#What is your relationship status?
-
+# 14. rel_status
+# What is your relationship status?
+ 
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(rel_status_grouped = case_when(
-    rel_status %in% c("Divorced", "Divorced - Remarried") ~ "Divorced or Remarried",
-    rel_status %in% c("In a relationship, but not married", "Married", "Widowed", "Widowed - Remarried") ~ "Married or In a Relationship",
-    rel_status %in% c("Single, never married") ~ "Single, Never Married",
+    rel_status %in% c("Divorced", "Widowed", "Single, never married") ~ "Singles",
+    rel_status %in% c("Divorced - Remarried", "In a relationship, but not married", "Married", "Widowed - Remarried") ~ "In a Relationship",
     rel_status %in% c("N/A", "NA") ~ NA_character_,
     TRUE ~ as.character(rel_status)
   )) %>%
   mutate(rel_status_grouped = as.factor(rel_status_grouped))
 
+# 15. children
+# Do you have children?
 
 
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(children_grouped = case_when(
+    children %in% c("Do not have children, and do not intend to", "Do not have children, but intend to") ~ "No Children",
+    children %in% c("Have children") ~ "Have Children",
+    children %in% c("N/A", "NA") ~ NA_character_,
+    TRUE ~ as.character(children)
+  )) %>%
+  mutate(children_grouped = as.factor(children_grouped))
+
+# 16. country
+# What country are you in?
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(country_grouped = case_when(
+    country %in% c("United States") ~ "United States",
+    TRUE ~ "Other"
+  )) %>%
+  mutate(country_grouped = as.factor(country_grouped))
+
+# 17. fin_indy
+# Are you financially independent? Meaning you do not need to work for money, regardless of whether you work for money.
+reddit_finance_sub$fin_indy <- as.factor(reddit_finance_sub$fin_indy)
+
+# 18. fin_indy_num
+# At what amount invested will you consider yourself Financially Independent? (What is your FI number?)
+reddit_finance_sub$fin_indy_num <- as.numeric(reddit_finance_sub$fin_indy_num)
+
+# 19. fin_indy_pct
+# What percent FI are you? (What percent of your FI number do you currently have?)
+# While exploring this dataset, there are certain outlier values that appear to be errors, such as individuals who have 95000, 2.00E+05, 260000, 4800000 percent of their FI number. Therefore, we will replace these values with NA to avoid distorting our distribution of this variable
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(
+    fin_indy_pct = as.numeric(fin_indy_pct),  
+    fin_indy_pct = ifelse(fin_indy_pct > 1000, NA_real_, fin_indy_pct)  
+  )
 
 
+# 25 fin_indy_lvl
+# Which of the following would you have considered yourself at the time you reached Financial Independence:
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(
+    fin_indy_lvl = case_when(
+      fin_indy_lvl == "Don't understand" ~ NA_character_,
+      TRUE ~ fin_indy_lvl
+    ),
+    fin_indy_lvl = as.factor(fin_indy_lvl)
+  )
+
+# 26. retire_age
+# At what age do you intend to retire?
+# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 18-23 will be replaced by 21, 24-28 by 26, and so on.
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(retire_age = case_when(
+    retire_age %in% c("Undecided") ~ NA_real_,
+    retire_age == "24-28" ~ 26,
+    retire_age == "29-33" ~ 31,
+    retire_age == "34-38" ~ 36,
+    retire_age == "39-43" ~ 41,
+    retire_age == "44-48" ~ 46,
+    retire_age == "49-53" ~ 51,
+    retire_age == "54-58" ~ 56,
+    retire_age == "59-63" ~ 61,
+    retire_age == "64-68" ~ 66,
+    retire_age == "69+" ~ 71,
+    TRUE ~ as.numeric(retire_age)
+  ))
+
+
+# 27. stp_whn_fin_indy
+# Do you intend to stop working for money when you reach financial independence?
+
+reddit_finance_sub$stp_whn_fin_indy <- as.factor(reddit_finance_sub$stp_whn_fin_indy)
+
+
+# 28. industry
+# Which of the following best describes the industry in which you currently or most recently work(ed)?
+# After analyzing the distribution of industries in our dataset, we will group industries with lower frequency into 'Other Services'
+
+reddit_finance_sub$industry_grouped <- as.factor(ifelse(
+  reddit_finance_sub$industry %in% c(
+    "Other Services", "Military", "Transportation",
+    "Natural Resources", "Arts, Entertainment, Recreation",
+    "Utilities", "Trade, transportation, utilities",
+    "Agriculture, Forestry, Fishing", "Media", "Real Estate",
+    "Leisure & Hospitality", "NA"
+  ),
+  "Other Services",
+  reddit_finance_sub$industry
+))
+
+
+# 29. employer
+# Which of the following best describes your current or most recent employer?
+reddit_finance_sub$employer <- as.factor(reddit_finance_sub$employer)
+
+# 30 role
+# Which of the following best describes your current or most recent job role?
+reddit_finance_sub$role <- as.factor(reddit_finance_sub$role)
+
+# 31 ft_status
+# What is your current employment status? - Full Time
+
+reddit_finance_sub$ft_status <- ifelse(
+  reddit_finance_sub$ft_status %in% c("N/A", "NA", "For an Organization (Employed), For Myself (Self-Employed)"),
+  NA_character_,
+  reddit_finance_sub$ft_status
+)
+
+reddit_finance_sub$ft_status <- as.factor(reddit_finance_sub$ft_status)
+
+
+# 32. pt_status
+# What is your current employment status? - Part Time, Regular
+
+reddit_finance_sub$pt_status <- ifelse(
+  reddit_finance_sub$pt_status %in% c("N/A", "NA", "For an Organization (Employed), For Myself (Self-Employed)"),
+  NA_character_,
+  reddit_finance_sub$pt_status
+)
+
+reddit_finance_sub$pt_status <- as.factor(reddit_finance_sub$pt_status)
+
+# 33 gig_status
+# What is your current employment status? -Side Gig, Intermittent
+
+reddit_finance_sub$gig_status <- ifelse(
+  reddit_finance_sub$gig_status %in% c("N/A", "NA", "For an Organization (Employed), For Myself (Self-Employed)"),
+  NA_character_,
+  ifelse(reddit_finance_sub$gig_status %in% c("For Myself (Self-Employed), N/A"), "For Myself (Self-Employed)", reddit_finance_sub$gig_status)
+)
+
+reddit_finance_sub$gig_status <- as.factor(reddit_finance_sub$gig_status)
+
+# 34. ne_status
+# What is your current employment status? -Not Employed
+
+#It is decided to eliminate the variable 'ne_status' as it does not seem to make much sense. The question initially refers to people without employment, but later, in the responses, the type of employer is mentioned. Given this situation, it would be difficult to interpret.
+
+# 35 edu_status
+# What is your current educational status?
+
+reddit_finance_sub$edu_status <- ifelse(reddit_finance_sub$edu_status %in% c("Full time student", "Part time student"), "Student", "Not a student")
+
+reddit_finance_sub$edu_status <- as.factor(reddit_finance_sub$edu_status)
+
+
+# 36 housing
+# What is your current housing situation?
+reddit_finance_sub$housing <- ifelse(
+  reddit_finance_sub$housing %in% c("Live with family or friends", "Own", "Rent"),
+  reddit_finance_sub$housing,
+  "Other"
+)
+
+reddit_finance_sub$housing <- as.factor(reddit_finance_sub$housing)
+
+
+# 24, 37 - 65 
+# For the income and expense variables, we will assume that missing values (NAs) indicate when a person has no expenses in that category. In such cases, we will consider these missing values to have a value of 0.
+
+variables_to_replace <- c(
+  "whn_fin_indy_num",
+  "home_value",
+  "brokerage_accts_tax",
+  "retirement_accts_tax",
+  "cash",
+  "invst_accts",
+  "spec_crypto",
+  "invst_prop_bus_own",
+  "other_val",
+  "student_loans",
+  "mortgage",
+  "auto_loan",
+  "credit_personal_loan",
+  "medical_debt",
+  "invst_prop_bus_own_debt",
+  "other_debt",
+  "2020_gross_inc",
+  "2020_housing_exp",
+  "2020_utilities_exp",
+  "2020_transp_exp",
+  "2020_necessities_exp",
+  "2020_lux_exp",
+  "2020_child_exp",
+  "2020_debt_repay",
+  "2020_invst_save",
+  "2020_charity",
+  "2020_healthcare_exp",
+  "2020_taxes",
+  "2020_edu_exp",
+  "2020_other_exp"
+)
+
+# Replace NAs with 0 in the specified variables
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate_at(vars(variables_to_replace), list(~replace_na(., 0)))
+
+
+#"Since there are many variables related to income or assets, debts, and expenses, we will create 3 variables that sum these individual items: total_debts, total_assets, and total_expenses
+
+#total_assets
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(total_assets = rowSums(select(., 
+    c("home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val","2020_gross_inc","2020_invst_save"))))
+
+
+#total_debts
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(total_debts = rowSums(select(., 
+    c("student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt","2020_debt_repay"))))
+
+
+#total_expenses
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(total_expenses = rowSums(select(., 
+    c("2020_housing_exp", "2020_utilities_exp", "2020_transp_exp", "2020_necessities_exp", "2020_lux_exp", "2020_child_exp", "2020_charity", "2020_healthcare_exp","2020_taxes", "2020_edu_exp", "2020_other_exp"))))
+
+
+# We finally removed some previously transformed variables that we will not be using in their original form.
+reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("political", "race_eth", "gender", "edu", "rel_status", "children","country", "industry","ne_status"))]
 ```
 
 ```{r}
 count_table <- reddit_finance_sub %>%
-  count(rel_status_grouped)
-
-# Imprime la tabla de conteo
-count_table
+  count(`total_expenses`)
 ```
 
 ```{r}
-summary(reddit_finance_sub)
+ggplot(reddit_finance_sub, aes(x = fin_indy, fill = fin_indy)) +
+  geom_bar() +
+  labs(x = "Respuesta", y = "Frecuencia", title = "Distribución de Respuestas") +
+  scale_fill_manual(values = c("green", "blue"))
+```
+
+```{r}
+logistic_mod <- glm(factor(fin_indy) ~ 
+                     + `num_incomes`
+                     + `pan_inc_chg`
+                     + `pan_inc_chg_pct`
+                     + `pan_exp_chg`
+                     + `pan_exp_chg_pct`
+                     + `pan_fi_chg`
+                     + `pan_ret_date_chg`
+                     + `pan_financial_impact`
+                     + `political_grouped`
+                     + `race_eth_grouped`
+                     + `gender_grouped`
+                     + `age`
+                     + `edu_grouped`
+                     + `rel_status_grouped`
+                     + `children_grouped`
+                     + `country_grouped`
+                     + `fin_indy_num`
+                     + `fin_indy_pct`
+                     + `retire_invst_num`
+                     + `tgt_sf_wthdrw_rt`
+                     + `max_retire_sup`
+                     + `retire_exp`
+                     + `whn_fin_indy_num`
+                     + `fin_indy_lvl`
+                     + `retire_age`
+                     + `stp_whn_fin_indy`
+                     + `industry_grouped`
+                     + `employer`
+                     + `role`
+                     + `ft_status`
+                     + `pt_status`
+                     + `gig_status`
+                     + `edu_status`
+                     + `housing`
+                     + `home_value`
+                     + `brokerage_accts_tax`
+                     + `retirement_accts_tax`
+                     + `cash`
+                     + `invst_accts`
+                     + `spec_crypto`
+                     + `invst_prop_bus_own`
+                     + `other_val`
+                     + `student_loans`
+                     + `mortgage`
+                     + `auto_loan`
+                     + `credit_personal_loan`
+                     + `medical_debt`
+                     + `invst_prop_bus_own_debt`
+                     + `other_debt`
+                     + `2020_gross_inc`
+                     + `2020_housing_exp`
+                     + `2020_utilities_exp`
+                     + `2020_transp_exp`
+                     + `2020_necessities_exp`
+                     + `2020_lux_exp`
+                     + `2020_child_exp`
+                     + `2020_debt_repay`
+                     + `2020_invst_save`
+                     + `2020_charity`
+                     + `2020_healthcare_exp`
+                     + `2020_taxes`
+                     + `2020_edu_exp`
+                     + `2020_other_exp`,
+                    data=reddit_finance_sub,
+                    family="binomial")
+summary(logistic_mod)
+```
+
+```{r}
+logistic_mod <- glm(factor(fin_indy) ~ 
+                     `num_incomes`
+
+                     + `age`
+          
+                    + `2020_transp_exp`
+                     + `2020_necessities_exp`
+                     + `2020_lux_exp`
+                     + `2020_child_exp`
+                     + `2020_debt_repay`
+                     + `2020_invst_save`
+                     + `2020_charity`
+                     + `2020_healthcare_exp`
+                     + `2020_taxes`
+                     + `2020_edu_exp`
+                     + `2020_other_exp`,      
+                    ,
+                    data=reddit_finance_sub,
+                    family="binomial",
+                    maxit = 100)
+summary(logistic_mod)
 ```
 
 ```{r}
 ```
 
 ```{r}
-glimpse(reddit_finance)
-```
-
-```{write.csv(reddit_finance, file = "mi_archivo.csv", row.names = FALSE)}
-
+glimpse(reddit_finance_sub)
 ```
 
 # Financial Independence Survey - Logistic Regression Model
 
 ## **Overview**
 
-The objective of this project is to develop a Logistic Regression Model to address the Research Question: **What factors contribute to an individual's perception of financial independence?**
+The objective of this project is to develop a Logistic Regression Model to address the Research Question:
 
-To accomplish this objective, we will analyze a dataset that is a subset of the official results from the 2020 Financial Independence Survey on Reddit (r/financialindependence). This subset exclusively comprises responses from individuals representing themselves (excluding contributions from other household members) and excludes retired individuals. The dataset encompasses **1,998 rows and 65 variables**, covering information such as income contributors, the financial impact of the pandemic, political affiliation, demographics, details about financial independence, employment status, and various financial aspects. The data has been sourced from Reddit.
+**What factors contribute to an individual's perception of financial independence?**
+
+To accomplish this objective, we will analyze a dataset that is a subset of the official results from the 2020 Financial Independence Survey on Reddit (r/financialindependence). This subset exclusively comprises responses from individuals representing themselves (excluding contributions from other household members) and excludes retired individuals. The dataset encompasses 1,998 rows and 65 variables, covering information such as income contributors, the financial impact of the pandemic, political affiliation, demographics, details about financial independence, employment status, and various financial aspects. The data has been sourced from Reddit.
+
+\| \| \|
+
+\|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--\|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--\|
+
+\| \*\*Total Observations (N)\*\* \| 1000 \|
+
+\| \*\*Total Variables (N)\*\* \| 50 \|
+
+\| \*\*Numeric variables\*\* \| \|
+
+\| - Discrete variables \| 20 \|
+
+\| - Continuous variables \| 30 \|
+
+\| \*\*Categorical variables\*\* \| \|
+
+\| - Nominal variables \| 15 \|
+
+\| - Ordinal variables \| 10 \|
 
 For additional details regarding the data dictionary and source information, please refer to the [www.openintro.org](https://www.openintro.org/data/index.php?data=reddit_finance) website.
 
 ## **Data cleaning**
 
 Which variables required cleaning? Are there any missing values? Did you make any assumptions during the data cleaning process?
+
+A series of transformations was carried out during the data cleaning process of their 65 original variables, among which the following stand out:
+
+-   Out of a total of 30 variables, which constituted numeric-type variables such as Children Expenses, Luxury Expenses, Transportation Expenses, Taxes, Medical Debt, etc., it was observed that they did not contain the number 0 but did have many NA (Not Available) values. The assumption was made that individuals who responded with 'NA' in fields such as Children Expenses did so because they had no associated expenses in that category. For this reason, in these 30 variables, NA values were replaced with 0.
+
+-   
 
 ## **Modeling**
 
