@@ -432,14 +432,16 @@ reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("p
 
 ```{r}
 logistic_mod <- glm(fin_indy ~ 
-age
-+political_grouped
-+housing
-+total_debts
-+total_assets
-+total_expenses
-+`2020_gross_inc`
-+`2020_invst_save`
+  age 
+  + political_grouped
+  + edu_grouped
+  + housing
+  + housing
+  + total_debts
+  + total_assets
+  + total_expenses
+  + `2020_gross_inc`
+  + `2020_invst_save`
   ,data=reddit_finance_sub,
   family="binomial")
 summary(logistic_mod)
