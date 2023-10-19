@@ -226,7 +226,9 @@ reddit_finance_sub <- reddit_finance_sub %>%
 
 # 17. fin_indy
 # Are you financially independent? Meaning you do not need to work for money, regardless of whether you work for money.
-reddit_finance_sub$fin_indy <- as.factor(reddit_finance_sub$fin_indy)
+
+reddit_finance_sub$fin_indy <- ifelse(reddit_finance_sub$fin_indy == "Yes", 1, 0)
+
 
 # 18. fin_indy_num
 # At what amount invested will you consider yourself Financially Independent? (What is your FI number?)
@@ -363,7 +365,6 @@ reddit_finance_sub$housing <- ifelse(
 
 reddit_finance_sub$housing <- as.factor(reddit_finance_sub$housing)
 
-
 # 24, 37 - 65 
 # For the income and expense variables, we will assume that missing values (NAs) indicate when a person has no expenses in that category. In such cases, we will consider these missing values to have a value of 0.
 
@@ -410,136 +411,83 @@ reddit_finance_sub <- reddit_finance_sub %>%
 #total_assets
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(total_assets = rowSums(select(., 
-    c("home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val","2020_gross_inc","2020_invst_save"))))
-
+    c("home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val","2020_invst_save"))))
 
 #total_debts
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(total_debts = rowSums(select(., 
-    c("student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt","2020_debt_repay"))))
-
+    c("student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt"))))
 
 #total_expenses
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(total_expenses = rowSums(select(., 
-    c("2020_housing_exp", "2020_utilities_exp", "2020_transp_exp", "2020_necessities_exp", "2020_lux_exp", "2020_child_exp", "2020_charity", "2020_healthcare_exp","2020_taxes", "2020_edu_exp", "2020_other_exp"))))
-
+    c("2020_housing_exp", "2020_utilities_exp", "2020_transp_exp", "2020_necessities_exp", "2020_lux_exp", "2020_child_exp","2020_debt_repay", "2020_charity", "2020_healthcare_exp","2020_taxes", "2020_edu_exp", "2020_other_exp"))))
 
 # We finally removed some previously transformed variables that we will not be using in their original form.
-reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("political", "race_eth", "gender", "edu", "rel_status", "children","country", "industry","ne_status"))]
+reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("political", "race_eth", "gender", "edu", "rel_status", "children","country", "industry","ne_status", "home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val","student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt","2020_housing_exp","2020_utilities_exp","2020_transp_exp","2020_necessities_exp","2020_lux_exp","2020_child_exp","2020_debt_repay","2020_invst_save","2020_charity","2020_healthcare_exp","2020_taxes","2020_edu_exp","2020_other_exp"))]
 ```
 
 ```{r}
 count_table <- reddit_finance_sub %>%
-  count(`total_expenses`)
+  count(`fin_indy`)
 ```
 
 ```{r}
-ggplot(reddit_finance_sub, aes(x = fin_indy, fill = fin_indy)) +
-  geom_bar() +
-  labs(x = "Respuesta", y = "Frecuencia", title = "Distribución de Respuestas") +
-  scale_fill_manual(values = c("green", "blue"))
-```
-
-```{r}
-logistic_mod <- glm(factor(fin_indy) ~ 
-                     + `num_incomes`
-                     + `pan_inc_chg`
-                     + `pan_inc_chg_pct`
-                     + `pan_exp_chg`
-                     + `pan_exp_chg_pct`
-                     + `pan_fi_chg`
-                     + `pan_ret_date_chg`
-                     + `pan_financial_impact`
-                     + `political_grouped`
-                     + `race_eth_grouped`
-                     + `gender_grouped`
-                     + `age`
-                     + `edu_grouped`
-                     + `rel_status_grouped`
-                     + `children_grouped`
-                     + `country_grouped`
-                     + `fin_indy_num`
-                     + `fin_indy_pct`
-                     + `retire_invst_num`
-                     + `tgt_sf_wthdrw_rt`
-                     + `max_retire_sup`
-                     + `retire_exp`
-                     + `whn_fin_indy_num`
-                     + `fin_indy_lvl`
-                     + `retire_age`
-                     + `stp_whn_fin_indy`
-                     + `industry_grouped`
-                     + `employer`
-                     + `role`
-                     + `ft_status`
-                     + `pt_status`
-                     + `gig_status`
-                     + `edu_status`
-                     + `housing`
-                     + `home_value`
-                     + `brokerage_accts_tax`
-                     + `retirement_accts_tax`
-                     + `cash`
-                     + `invst_accts`
-                     + `spec_crypto`
-                     + `invst_prop_bus_own`
-                     + `other_val`
-                     + `student_loans`
-                     + `mortgage`
-                     + `auto_loan`
-                     + `credit_personal_loan`
-                     + `medical_debt`
-                     + `invst_prop_bus_own_debt`
-                     + `other_debt`
-                     + `2020_gross_inc`
-                     + `2020_housing_exp`
-                     + `2020_utilities_exp`
-                     + `2020_transp_exp`
-                     + `2020_necessities_exp`
-                     + `2020_lux_exp`
-                     + `2020_child_exp`
-                     + `2020_debt_repay`
-                     + `2020_invst_save`
-                     + `2020_charity`
-                     + `2020_healthcare_exp`
-                     + `2020_taxes`
-                     + `2020_edu_exp`
-                     + `2020_other_exp`,
-                    data=reddit_finance_sub,
-                    family="binomial")
+logistic_mod <- glm(fin_indy ~ 
+  age
+  
+  +total_debts
+  +total_assets
+  +total_expenses+`2020_gross_inc`,
+  data=reddit_finance_sub,
+  family="binomial")
 summary(logistic_mod)
 ```
 
 ```{r}
-logistic_mod <- glm(factor(fin_indy) ~ 
-                     `num_incomes`
-
-                     + `age`
-          
-                    + `2020_transp_exp`
-                     + `2020_necessities_exp`
-                     + `2020_lux_exp`
-                     + `2020_child_exp`
-                     + `2020_debt_repay`
-                     + `2020_invst_save`
-                     + `2020_charity`
-                     + `2020_healthcare_exp`
-                     + `2020_taxes`
-                     + `2020_edu_exp`
-                     + `2020_other_exp`,      
-                    ,
-                    data=reddit_finance_sub,
-                    family="binomial",
-                    maxit = 100)
+logistic_mod <- glm(fin_indy ~ 
++num_incomes
++pan_inc_chg
++pan_inc_chg_pct
++pan_exp_chg
++pan_exp_chg_pct
++pan_fi_chg
++pan_ret_date_chg
++pan_financial_impact
++political_grouped
++race_eth_grouped
++gender_grouped
++age
++edu_grouped
++rel_status_grouped
++children_grouped
++country_grouped
++fin_indy_num
++fin_indy_pct
++retire_invst_num
++tgt_sf_wthdrw_rt
++max_retire_sup
++retire_exp
++whn_fin_indy_num
++fin_indy_lvl
++retire_age
++stp_whn_fin_indy
++industry_grouped
++employer
++role
++ft_status
++pt_status
++gig_status
++edu_status
++housing
++total_debts
++total_assets
++total_expenses
++`2020_gross_inc`
+,
+  data=reddit_finance_sub,
+  family="binomial")
 summary(logistic_mod)
-```
-
-```{r}
-```
-
-```{r}
-glimpse(reddit_finance_sub)
 ```
 
 # Financial Independence Survey - Logistic Regression Model
