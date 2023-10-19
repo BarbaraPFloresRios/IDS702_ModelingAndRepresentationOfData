@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results='h
 
 ```{r}
 library(pacman)
-p_load(openintro, tidyverse,dplyr,tidyr)
+p_load(openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071)
 
 ```
 
@@ -431,26 +431,56 @@ reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("p
 ```
 
 ```{r}
+#We are removing the NA records from the variables that we will use for our model.
+columns <- c("age", "political_grouped", "edu_grouped", "housing", "total_debts", 
+                      "total_assets", "total_expenses", "2020_gross_inc", "2020_invst_save")
+
+# Eliminar los registros con valores NA en las columnas de interés
+reddit_finance_sub <- reddit_finance_sub[complete.cases(reddit_finance_sub[, columns]), ]
+
+```
+
+```{r}
 logistic_mod <- glm(fin_indy ~ 
-  age 
-  + political_grouped
-  + edu_grouped
-  + housing
-  + housing
-  + total_debts
-  + total_assets
-  + total_expenses
-  + `2020_gross_inc`
-  + `2020_invst_save`
-  ,data=reddit_finance_sub,
-  family="binomial")
+                  age 
+                  + political_grouped
+                  + edu_grouped
+                  + housing
+                  + housing
+                  + total_debts
+                  + total_assets
+                  + total_expenses
+                  + `2020_gross_inc`
+                  + `2020_invst_save`
+                  ,data=reddit_finance_sub,
+                  family="binomial")
+
 summary(logistic_mod)
 ```
 
 ```{r}
-# Supongamos que tu data frame se llama 'mi_data' y quieres guardarlo como un archivo CSV llamado 'mi_archivo.csv'
-write.csv(reddit_finance_sub, file = "mi_archivo.csv", row.names = FALSE)
+exp(coef(logistic_mod))
+```
 
+```{r}
+confint(logistic_mod)
+```
+
+```{r}
+exp(confint(logistic_mod))
+
+```
+
+```{r}
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(fin_indy = ifelse(fin_indy == 1, "Yes", "No"))
+
+library(pROC)
+roc((reddit_finance_sub$fin_indy),fitted(logistic_mod),print.thres="best",plot=TRUE,print.auc=TRUE)
+```
+
+```{r}
+confusionMatrix(factor(ifelse(fitted(logistic_mod)>0.067,"Yes","No")),factor(reddit_finance_sub$fin_indy),positive="Yes",mode="everything")
 ```
 
 # Financial Independence Survey - Logistic Regression Model
@@ -476,6 +506,10 @@ A series of transformations was carried out during the data cleaning process of 
 -   
 
 ## **Modeling**
+
+```{r results=TRUE}
+summary(logistic_mod)
+```
 
 ## **Results**
 
