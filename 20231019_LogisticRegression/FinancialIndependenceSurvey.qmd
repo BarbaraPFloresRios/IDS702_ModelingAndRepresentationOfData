@@ -1,19 +1,44 @@
 ---
-format: pdf 
+title: "Financial Independence Survey - Logistic Regression Model"
+author: "Barbara Flores"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    number-depth: 3
 output: 
   pdf_document: 
-  latex_engine: xelatex
+    latex_engine: xelatex
+    keep_tex: true
+    latex_args: ["-shell-escape"]
+fontsize: 11pt
+header-includes:
+  - "\\usepackage[left=0.75in,right=0.75in,top=0.75in,bottom=1.25in]{geometry}"
+  - "\\usepackage{enumitem}"
+  - "\\setlist{noitemsep, topsep=0pt, parsep=2pt, partopsep=0pt}"
+  - "\\setlength{\\parskip}{0pt}"
+  - "\\RedeclareSectionCommand[beforeskip=-1sp,afterskip=0.5\\baselineskip]{section}"
+  - "\\RedeclareSectionCommand[beforeskip=-1sp,afterskip=0.25\\baselineskip]{subsection}"
+
+editor: 
+  markdown: 
+    wrap: 72
 ---
+
+\setcounter{page}{0}
+
+\thispagestyle{empty}
+
+{{< pagebreak >}}
 
 ```{r, include = FALSE}
 # Global settings to hide code and results in the final document
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results='hide')
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results= 'hide')
 ```
 
 ```{r}
 library(pacman)
-p_load(openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071)
-
+p_load(openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071, sjPlot)
 ```
 
 ```{r}
@@ -48,20 +73,20 @@ reddit_finance_sub$pan_inc_chg <- factor(reddit_finance_sub$pan_inc_chg, levels 
 
 # 3. pan_inc_chg_pct
 # By how much did your earned income change?
-# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 1-10% will be replaced by 5%, 11-20% by 15%, and so on.
+# For this variable, we apply the decision rule of replacing the intervals with their order number. For example, the interval 1-10% will be replaced by 1, 11-20% by 2, and so on.
 
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(pan_inc_chg_pct = case_when(
-    pan_inc_chg_pct == "1-10%"  ~ 0.05,
-    pan_inc_chg_pct == "11-20%" ~ 0.15,
-    pan_inc_chg_pct == "21-30%" ~ 0.25,
-    pan_inc_chg_pct == "31-40%" ~ 0.35,
-    pan_inc_chg_pct == "41-50%" ~ 0.45,
-    pan_inc_chg_pct == "51-60%" ~ 0.55,
-    pan_inc_chg_pct == "61-70%" ~ 0.65,
-    pan_inc_chg_pct == "71-80%" ~ 0.75,
-    pan_inc_chg_pct == "81-90%" ~ 0.85,
-    pan_inc_chg_pct == "91-100%" ~ 0.95,
+    pan_inc_chg_pct == "1-10%"  ~ 1,
+    pan_inc_chg_pct == "11-20%" ~ 2,
+    pan_inc_chg_pct == "21-30%" ~ 3,
+    pan_inc_chg_pct == "31-40%" ~ 4,
+    pan_inc_chg_pct == "41-50%" ~ 5,
+    pan_inc_chg_pct == "51-60%" ~ 6,
+    pan_inc_chg_pct == "61-70%" ~ 7,
+    pan_inc_chg_pct == "71-80%" ~ 8,
+    pan_inc_chg_pct == "81-90%" ~ 9,
+    pan_inc_chg_pct == "91-100%" ~ 10,
     pan_inc_chg_pct == "No change" ~ 0,
     TRUE ~ as.numeric(pan_inc_chg_pct)  
   ))
@@ -76,20 +101,20 @@ reddit_finance_sub$pan_exp_chg <- factor(reddit_finance_sub$pan_exp_chg, levels 
 
 # 5.pan_exp_chg_pct
 # By how much did your expenses change?
-# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 1-10% will be replaced by 5%, 11-20% by 15%, and so on.
+# For this variable, we apply the decision rule of replacing the intervals with their order number. For example, the interval 1-10% will be replaced by 1, 11-20% by 2, and so on.
 
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(pan_exp_chg_pct = case_when(
-    pan_exp_chg_pct == "1-10%"  ~ 0.05,
-    pan_exp_chg_pct == "11-20%" ~ 0.15,
-    pan_exp_chg_pct == "21-30%" ~ 0.25,
-    pan_exp_chg_pct == "31-40%" ~ 0.35,
-    pan_exp_chg_pct == "41-50%" ~ 0.45,
-    pan_exp_chg_pct == "51-60%" ~ 0.55,
-    pan_exp_chg_pct == "61-70%" ~ 0.65,
-    pan_exp_chg_pct == "71-80%" ~ 0.75,
-    pan_exp_chg_pct == "81-90%" ~ 0.85,
-    pan_exp_chg_pct == "91-100%" ~ 0.95,
+    pan_exp_chg_pct == "1-10%"  ~ 1,
+    pan_exp_chg_pct == "11-20%" ~ 2,
+    pan_exp_chg_pct == "21-30%" ~ 3,
+    pan_exp_chg_pct == "31-40%" ~ 4,
+    pan_exp_chg_pct == "41-50%" ~ 5,
+    pan_exp_chg_pct == "51-60%" ~ 6,
+    pan_exp_chg_pct == "61-70%" ~ 7,
+    pan_exp_chg_pct == "71-80%" ~ 8,
+    pan_exp_chg_pct == "81-90%" ~ 9,
+    pan_exp_chg_pct == "91-100%" ~ 10,
     pan_exp_chg_pct == "No change" ~ 0,
     TRUE ~ as.numeric(pan_exp_chg_pct)  
   ))
@@ -151,21 +176,23 @@ reddit_finance_sub$gender_grouped <- as.factor(reddit_finance_sub$gender_grouped
 
 # 12 age
 # What is your age?
-# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 18-23 will be replaced by 21, 24-28 by 26, and so on.
+# For this variable, we apply the decision rule of replacing the intervals with their order number. For example, the interval "<18" will be replaced by 1, "18-23" by 2, and so on.
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(age = case_when(
-    age %in% c("<18", "N/A", "NA") ~ NA_real_,
-    age == "18-23" ~ 21,
-    age == "24-28" ~ 26,
-    age == "29-33" ~ 31,
-    age == "34-38" ~ 36,
-    age == "39-43" ~ 41,
-    age == "44-48" ~ 46,
-    age == "49-53" ~ 51,
-    age == "54-58" ~ 56,
-    age == "59-63" ~ 61,
+    age %in% c("N/A", "NA") ~ NA_real_,
+    age == "<18"   ~ 1,
+    age == "18-23" ~ 2,
+    age == "24-28" ~ 3,
+    age == "29-33" ~ 4,
+    age == "34-38" ~ 5,
+    age == "39-43" ~ 6,
+    age == "44-48" ~ 7,
+    age == "49-53" ~ 8,
+    age == "54-58" ~ 9,
+    age == "59-63" ~ 10,
     TRUE ~ as.numeric(age)
   ))
+
 
 reddit_finance_sub$age <- as.numeric(reddit_finance_sub$age)
 
@@ -227,8 +254,8 @@ reddit_finance_sub <- reddit_finance_sub %>%
 # 17. fin_indy
 # Are you financially independent? Meaning you do not need to work for money, regardless of whether you work for money.
 
-reddit_finance_sub$fin_indy <- ifelse(reddit_finance_sub$fin_indy == "Yes", 1, 0)
 
+reddit_finance_sub$fin_indy <- ifelse(reddit_finance_sub$fin_indy == "Yes", 1, 0)
 
 # 18. fin_indy_num
 # At what amount invested will you consider yourself Financially Independent? (What is your FI number?)
@@ -259,20 +286,20 @@ reddit_finance_sub <- reddit_finance_sub %>%
 
 # 26. retire_age
 # At what age do you intend to retire?
-# For this variable, we apply the decision rule of replacing the intervals with their central number. For example, the interval 18-23 will be replaced by 21, 24-28 by 26, and so on.
+# For this variable, we apply the decision rule of replacing the intervals with their order number. For example, the interval "24-28" will be replaced by 1, "29-33" by 2, and so on.
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(retire_age = case_when(
     retire_age %in% c("Undecided") ~ NA_real_,
-    retire_age == "24-28" ~ 26,
-    retire_age == "29-33" ~ 31,
-    retire_age == "34-38" ~ 36,
-    retire_age == "39-43" ~ 41,
-    retire_age == "44-48" ~ 46,
-    retire_age == "49-53" ~ 51,
-    retire_age == "54-58" ~ 56,
-    retire_age == "59-63" ~ 61,
-    retire_age == "64-68" ~ 66,
-    retire_age == "69+" ~ 71,
+    retire_age == "24-28" ~ 1,
+    retire_age == "29-33" ~ 2,
+    retire_age == "34-38" ~ 3,
+    retire_age == "39-43" ~ 4,
+    retire_age == "44-48" ~ 5,
+    retire_age == "49-53" ~ 6,
+    retire_age == "54-58" ~ 7,
+    retire_age == "59-63" ~ 8,
+    retire_age == "64-68" ~ 9,
+    retire_age == "69+"   ~ 10,
     TRUE ~ as.numeric(retire_age)
   ))
 
@@ -357,13 +384,34 @@ reddit_finance_sub$edu_status <- as.factor(reddit_finance_sub$edu_status)
 
 # 36 housing
 # What is your current housing situation?
-reddit_finance_sub$housing <- ifelse(
-  reddit_finance_sub$housing %in% c("Live with family or friends", "Own", "Rent"),
-  reddit_finance_sub$housing,
-  "Other"
-)
 
-reddit_finance_sub$housing <- as.factor(reddit_finance_sub$housing)
+
+reddit_finance_sub <- reddit_finance_sub %>%
+  mutate(housing_grouped = case_when(
+    housing %in% c("Own",
+                   "Own a house but currently living in a RV",
+                   "Own a house that I rent out but I rent an apartment in another state",
+                   "Rent and own",
+                   "Rent my apartment, but own a home I rent out",
+                   "Rent temporarily while building new home") ~ "Own",
+    housing %in% c("Government housing",
+                   "Homeless",
+                   "House owned by parents",
+                   "Houseless/nomadic - living in a car voluntarily",
+                   "Live with family or friends",
+                   "Live with family while building a house",
+                   "Live with partner and split costs of owning",
+                   "Live with partner in their house",
+                   "Liveaboard boat",
+                   "Living with parents",
+                   "NA",
+                   "Own and live in a van",
+                   "Provided by employer or school",
+                   "Rent") ~ "Not Own",
+    TRUE ~ "Other"
+  ))
+
+reddit_finance_sub$housing_grouped <- as.factor(reddit_finance_sub$housing_grouped)
 
 # 24, 37 - 65 
 # For the income and expense variables, we will assume that missing values (NAs) indicate when a person has no expenses in that category. In such cases, we will consider these missing values to have a value of 0.
@@ -403,11 +451,12 @@ variables_to_replace <- c(
 
 # Replace NAs with 0 in the specified variables
 reddit_finance_sub <- reddit_finance_sub %>%
-  mutate_at(vars(variables_to_replace), list(~replace_na(., 0)))
+  dplyr::mutate_at(vars(variables_to_replace), list(~replace_na(., 0)))
+
 
 # Deleting outliers
-reddit_finance_sub <- reddit_finance_sub %>%
-  mutate(cash = ifelse(cash >= 4500000.00, NA, cash))
+#reddit_finance_sub <- reddit_finance_sub %>%
+ # filter(abs(cash - mean(cash, na.rm = TRUE)) <= 3 * sd(cash, na.rm = TRUE))
 
 #"Since there are many variables related to income or assets, debts, and expenses, we will create 3 variables that sum these individual items: total_debts, total_assets, and total_expenses
 
@@ -415,6 +464,7 @@ reddit_finance_sub <- reddit_finance_sub %>%
 reddit_finance_sub <- reddit_finance_sub %>%
   mutate(total_assets = rowSums(select(., 
     c("home_value","brokerage_accts_tax","retirement_accts_tax","cash","invst_accts","spec_crypto","invst_prop_bus_own","other_val"))))
+
 
 #total_debts
 reddit_finance_sub <- reddit_finance_sub %>%
@@ -427,25 +477,159 @@ reddit_finance_sub <- reddit_finance_sub %>%
     c("2020_housing_exp", "2020_utilities_exp", "2020_transp_exp", "2020_necessities_exp", "2020_lux_exp", "2020_child_exp","2020_debt_repay", "2020_charity", "2020_healthcare_exp","2020_taxes", "2020_edu_exp", "2020_other_exp"))))
 
 # We finally removed some previously transformed variables that we will not be using in their original form.
-reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("political", "race_eth", "gender", "edu", "rel_status", "children","country", "industry","ne_status", "home_value","brokerage_accts_tax","retirement_accts_tax", "cash", "invst_accts","spec_crypto","invst_prop_bus_own","other_val","student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt","2020_housing_exp","2020_utilities_exp","2020_transp_exp","2020_necessities_exp","2020_lux_exp","2020_child_exp","2020_debt_repay","2020_charity","2020_healthcare_exp","2020_taxes","2020_edu_exp","2020_other_exp"))]
+reddit_finance_sub <- reddit_finance_sub[, !(names(reddit_finance_sub) %in% c("political", "race_eth", "gender", "edu", "rel_status", "children","country", "industry","ne_status","housing","home_value","brokerage_accts_tax","retirement_accts_tax", "cash", "invst_accts","spec_crypto","invst_prop_bus_own","other_val","student_loans","mortgage","auto_loan","credit_personal_loan","medical_debt","invst_prop_bus_own_debt","other_debt","2020_housing_exp","2020_utilities_exp","2020_transp_exp","2020_necessities_exp","2020_lux_exp","2020_child_exp","2020_debt_repay","2020_charity","2020_healthcare_exp","2020_taxes","2020_edu_exp","2020_other_exp"))]
 ```
 
 ```{r}
 #We are removing the NA records from the variables that we will use for our model.
-columns <- c("age", "political_grouped", "edu_grouped", "housing", "total_debts", 
+columns <- c("age", "political_grouped", "edu_grouped", "housing_grouped", "total_debts", 
                       "total_assets", "total_expenses", "2020_gross_inc", "2020_invst_save")
 
 reddit_finance_sub <- reddit_finance_sub[complete.cases(reddit_finance_sub[, columns]), ]
 
 ```
 
-```{r}
+\vspace{0.5cm}
+
+# **Overview**
+
+The objective of this project is to address the research question:
+
+**What factors contribute to an individual's perception of financial
+independence?**
+
+To accomplish this objective, we will perform logistic regression
+analysis using a dataset that is a subset of the official results from
+the 2020 Financial Independence Survey on Reddit. This subset includes
+responses from individuals who represent themselves (excluding
+contributions from other household members) and excludes responses from
+retired individuals. The dataset encompasses **1,998 rows** and **65
+variables**, covering information such as income contributors, the
+financial impact of the pandemic, political affiliation, demographics,
+details about financial independence, employment status, and various
+financial aspects. The data has been sourced from Reddit. For additional
+details regarding the data dictionary and source information, please
+refer to the
+[www.openintro.org](https://www.openintro.org/data/index.php?data=reddit_finance)
+website.
+
+In our original dataset, 147 individuals, which accounts for 8% of our
+sample, reported considering themselves financially independent.
+Therefore, we have unbalanced data, which we should take into
+consideration in our future analyses.
+
+\vspace{0.5cm}
+
+# **Data cleaning**
+
+In the data cleaning process, the following transformations were
+implemented. For more details on the specific variables that experienced
+these transformations, please refer to the appendix page.
+
+-   The dependent variable **fin_indy** (Are you financially
+    independent?) was transformed from a string variable to a binary
+    numeric variable (0 and 1).
+
+-   The variable **political** had 24 categories, which were reduced to
+    4: 'Democrat,' 'Libertarian Party,' 'Republican,' and 'Other,'
+    because the data had many categories with very few observations.
+    Finally, it was transformed from string to factor.
+
+-   The variable **age** was transformed from a string variable to a
+    numeric variable to simplify analysis, with each category assigned a
+    corresponding numeric value (1-8) to represent age brackets.
+
+-   The variable **edu** had 11 categories, which were reduced to 4:
+    "High School or Less", "Some College or Trade School", "Bachelor's
+    or Associate's Degree", "Doctorate or Master's Degree", because the
+    data had many categories with very few observations. Then, it was
+    transformed from string to factor.
+
+-   The variable **housing** (What is your current housing situation?)
+    had 19 categories, which were reduced to 2: "Own", "Not Own",
+    because the data had many categories with very few observations.
+    Finally, it was transformed from string to factor.
+
+-   Out of a total of 29 variables, which constituted numeric-type
+    variables such as Children Expenses, Luxury Expenses, Transportation
+    Expenses, Taxes, Medical Debt, etc., it was observed that they did
+    not contain the number 0 but did have many NA values. The assumption
+    was made that individuals who responded with NA in fields such as
+    Children Expenses did so because they had no associated expenses in
+    that category. For this reason, in these 29 variables, NA values
+    were replaced with 0. The complete detail of the variables can be
+    reviewed on the appendix page.
+
+-   The variable **total_assets** was created, which is formed by the
+    sum of 8 variables such as cash, investment accounts, crypto, etc.
+    For more details, refer to the appendix.
+
+-   The variable **total_debts** was created, which is formed by the sum
+    of 7 variables such as student loans, mortgage, medical debt, etc.
+    For more details, refer to the appendix.
+
+-   The variable **total_expenses** was created, which is formed by the
+    sum of 12 variables such as necessities expenses, children expenses,
+    transportation expenses, etc.
+
+-   Finally, observations with NA values for any of the above variables
+    were removed, resulting in 11 observations out of the original total
+    of 1,998, leaving us with 1,987 final observations.
+
+# **Modeling**
+
+\vspace{0.5cm}
+
+## Logistic Regression Model
+
+To address our research question, we will employ a Logistic Regression
+Model. This model is suitable for this situation as it allows us to
+examine how various predictor variables influence the probability of an
+individual perceiving financial independence. Given that the variable of
+interest is binary (yes/no), logistic regression will provide us with
+estimations of log probabilities and coefficients that will aid in
+understanding the direction and strength of the relationship between the
+considered factors and the perception of financial independence.
+
+\vspace{0.5cm}
+
+## Variable Selection
+
+After analyzing the variables provided in the dataset, those that could
+be considered to influence the financial independence variable were
+identified. The following variables were selected a priori as
+predictors: **Age**, **Political** (With which political party do you
+most closely identify? ), **Education** (What is the highest level of
+education you have completed? ), **Housing** (What is your current
+housing situation? **Rent**, Own...) , **Total Debts**, **Total
+Assets**, **Total Expenses**, **2020 Gross Income**, **2020 Investments,
+2020 savings**.
+
+For the variable age, it is expected that as a person gets older, they
+are more likely to have achieved greater economic stability and,
+therefore, are more prone to being financially independent. Regarding
+the political variable, it is anticipated that individuals belonging to
+parties that oppose, for example, tax increases, see economic
+independence as feasible through their own assets. It is expected that
+with higher education, there is a greater likelihood of being
+financially independent. Concerning the housing variable, it is expected
+that owning a home will significantly impact the dependent variable. In
+the case of the variables debt, assets, expenses, 2020 income, and 2020
+investments, they are considered closely related to the dependent
+variable, as the available wealth of an individual, i.e., income minus
+expenses, assets minus liabilities, will determine whether they can
+achieve economic independence or not.
+
+\vspace{0.5cm}
+
+# **Results**
+
+```{r, results = FALSE}
 logistic_mod <- glm(factor(fin_indy) ~ 
                      age+
                     political_grouped
                   + edu_grouped
-                  + housing
-                  + housing
+                  + housing_grouped
                   + total_debts
                   + total_assets
                   + total_expenses
@@ -457,201 +641,435 @@ logistic_mod <- glm(factor(fin_indy) ~
 summary(logistic_mod)
 ```
 
-```{r}
-exp(coef(logistic_mod))
+```{}
 ```
 
 ```{r}
-confint(logistic_mod)
-```
-
-```{r}
-exp(confint(logistic_mod))
+rows_to_remove <-  c(168, 156, 167, 165)
+reddit_finance_sub2 <- reddit_finance_sub[-rows_to_remove, ]
 
 ```
 
-```{r, include = FALSE}
+```{r, results = TRUE}
+logistic_mod2 <- glm(factor(fin_indy) ~ 
+                    age
+                  + political_grouped
+                  + edu_grouped
+                  + housing_grouped
+                  + total_debts
+                  + total_assets
+                  + total_expenses
+                  + `2020_gross_inc`
+                  + `2020_invst_save`
+                  ,data=reddit_finance_sub2,
+                  family="binomial")
 
-reddit_finance_sub <- reddit_finance_sub %>%
-  mutate(fin_indy = ifelse(fin_indy == 1, "Yes", "No"))
-
-library(pROC)
-roc((reddit_finance_sub$fin_indy),fitted(logistic_mod),print.thres="best",plot=TRUE,print.auc=TRUE)
+summary(logistic_mod2)
 ```
 
-```{r}
-confusionMatrix(factor(ifelse(fitted(logistic_mod)>0.067,"Yes","No")),factor(reddit_finance_sub$fin_indy),positive="Yes",mode="everything")
+Age exhibits a positive association, indicating that as individuals age,
+the likelihood of financial independence increases. Affiliation with the
+Republican Party is associated with higher odds of financial
+independence compared to the reference category. Education categories
+show no statistically significant effects. Regarding housing,
+individuals with "Other" housing arrangements are more likely to be
+financially independent, while owning or renting does not show
+significant effects. Notably, variables related to financial status,
+such as total assets and total debts, demonstrate significant impacts,
+with higher assets and lower debts associated with increased odds of
+financial independence. The model's goodness of fit is evident from the
+lower residual deviance compared to the null deviance. Overall, the
+findings highlight the multifaceted nature of factors contributing to
+financial independence.
+
+A lower AIC value, specifically 820.88, implies a favorable balance
+between the model's capacity to fit the data and its simplicity. This
+suggests that the logistic regression model effectively captures the
+data patterns considering its complexity.
+
+## **ROC Curve**
+
+```{r, fig.width=8, fig.height=6, results = TRUE}
+
+roc1 <- roc(reddit_finance_sub$fin_indy, fitted(logistic_mod))
+roc2 <- roc(reddit_finance_sub2$fin_indy, fitted(logistic_mod2))
+
+
+# Create the ROC plot
+plot(roc1, col = "blue", main = "ROC Curve Comparison")  # First ROC curve
+lines(roc2, col = "red")  # Second ROC curve
+
+# Add a legend
+legend("bottomright", legend = c("Model 1", "Model 2"), col = c("blue", "red"), lwd = 2)
+
+# Print the AUC values for both models
+text(0.7, 0.3, paste("AUC Model 1 = ", round(roc1$auc, 4)), col = "blue")
+text(0.7, 0.25, paste("AUC Model 2 = ", round(roc2$auc, 4)), col = "red")
+
+# Print the best threshold for Model 2 with more decimals
+best_threshold_model2 <- roc2$thresholds[which.max(roc2$sensitivities + roc2$specificities)]
+text(0.7, 0.2, sprintf("Best Threshold Model 2 = %.4f", best_threshold_model2), col = "red")
+
+
+
 ```
 
-# Financial Independence Survey - Logistic Regression Model
+Upon observing the ROC curve, it becomes evident that the model's
+discriminative performance is robust, as indicated by the AUC value of
+0.861. Notably, at the specific threshold of 0.067, a distinct point on
+the curve is identified, emphasizing the tailored balance achieved
+between the true positive and false positive rates. This nuanced insight
+from the ROC analysis underscores the model's ability to effectively
+classify instances with a refined understanding of the trade-off between
+positive predictions and potential errors
 
-## **Overview**
+Additionally, the confusion matrix was computed (see in the appendix).
+The confusion matrix results reveal that, despite the low prevalence of
+positive responses, the model achieves an accuracy of 79.82%.
+Sensitivity and specificity metrics are crucial in this imbalanced
+context, showcasing the model's ability to detect positive and negative
+instances, respectively. The low precision (23.93%) suggests that
+positive predictions should be approached with caution. Although the
+Kappa coefficient implies some agreement beyond chance (0.2888), it is
+vital to consider metrics adjusted for imbalance, such as sensitivity
+and specificity, for a more comprehensive assessment of the model's
+performance.
 
-The objective of this project is to develop a Logistic Regression Model to address the Research Question:
+After generating our model, we can, for example, observe the behavior of
+one of the variables that turned out to be most influential in
+predicting our dependent variable, Total Assets. We can see how the
+group of individuals who are financially independent indeed has
+significantly higher assets.
 
-**What factors contribute to an individual's perception of financial independence?**
+```{r, fig.width=8, fig.height=5, results = TRUE}
 
-To accomplish this objective, we will analyze a dataset that is a subset of the official results from the 2020 Financial Independence Survey on Reddit. This subset comprises responses from individuals representing themselves (excluding contributions from other household members) and excludes retired individuals. The dataset encompasses **1,998 rows and 65 variables**, covering information such as income contributors, the financial impact of the pandemic, political affiliation, demographics, details about financial independence, employment status, and various financial aspects. The data has been sourced from Reddit.
+reddit_finance_sub$fin_indy <- as.factor(reddit_finance_sub$fin_indy)
 
-For additional details regarding the data dictionary and source information, please refer to the [www.openintro.org](https://www.openintro.org/data/index.php?data=reddit_finance) website.
+# Crear el boxplot sin outliers
+boxplot(total_assets ~ fin_indy, data = reddit_finance_sub, 
+        main = "Boxplot de Total Assets vs financial independence",
+        xlab = "Fin Indy", ylab = "Total Assets",
+        outline = FALSE)
+```
 
-## **Data cleaning**
+# **Conclusion and Future work**
 
-In the data cleaning process, the following transformations were implemented. For more details on the specific variables that experienced these transformations, please refer to the appendix page.
+Given the previously results, the logistic regression model indicates a
+positive association between age and financial independence, while
+Republican Party affiliation, "Other" housing arrangements, and
+favorable financial statuses significantly contribute. The model's
+performance, reflected in the AUC of 0.861 and nuanced insights from the
+ROC analysis, underscores its ability to discern positive instances.
+However, the confusion matrix highlights the challenge of imbalanced
+classes, urging caution regarding positive predictions. Despite an
+accuracy of 79.82%, the evaluation of the model's practical utility
+should prioritize precision and sensitivity.
 
--   The dependent variable **fin_indy** (Are you financially independent?) was transformed from a string variable to a binary numeric variable (0 and 1).
+The conducted analysis provides us with a model to identify factors
+influencing people's perception of financial independence. While the
+results make sense, it's crucial to consider study limitations. One
+important aspect is the potential presence of confounding variables,
+such as age, which could impact an individual's levels of assets,
+liabilities, and income, factors theoretically influencing financial
+independence. A future analysis could explore the results by removing
+the confounding variable of age to more precisely assess the impact of
+the specific factors considered in our model.
 
--   The variable **political** had 24 categories, which were reduced to 4: "Democrat," "Libertarian Party," "Republican," and "Other." Finally, it was transformed from string to factor.
+Furthermore, it would be relevant to conduct cross-validation analyses
+to evaluate the model's generalization capacity to unseen data. This
+helps verify if the model is robust and can be applied to new samples,
+crucial for ensuring the reliability of conclusions and the practical
+utility of the model in different contexts.
 
--   The variable **age** was transformed from a string variable to a numeric variable.
-
--   The variable **edu** had 11 categories, which were reduced to 4: "High School or Less", "Some College or Trade School", "Bachelor's or Associate's Degree", "Doctorate or Master's Degree". Finally, it was transformed from string to factor.
-
--   The variable **housing** (What is your current housing situation?) had 19 categories, which were reduced to 3: "Live with family or friends", "Own", "Rent". Finally, it was transformed from string to factor.
-
--   Out of a total of 29 variables, which constituted numeric-type variables such as Children Expenses, Luxury Expenses, Transportation Expenses, Taxes, Medical Debt, etc., it was observed that they did not contain the number 0 but did have many NA values. The assumption was made that individuals who responded with NA in fields such as Children Expenses did so because they had no associated expenses in that category. For this reason, in these 29 variables, NA values were replaced with 0. The complete detail of the variables can be reviewed on the appendix page
-
--   For the **cash** variable, the outliers that deviated more than 3 standard deviations from the mean were removed.
-
--   The variable **total_assets** was created, which is formed by the sum of 8 variables such as cash, investment accounts, crypto, etc. or more information, refer to the appendix
-
--   The variable **total_debts** was created, which is formed by the sum of 7 variables such as student loans, mortgage, medical debt, etc. or more information, refer to the appendix
-
--   The variable **total_expenses** was created, which is formed by the sum of 12 variables such as necessities expenses, children expenses, transportation expenses, etc. or more information, refer to the appendix
-
--   Finally, observations with NA values for any of the above variables were removed, resulting in 16 observations out of the original total of 1,998, leaving us with 1,982 final observations.
-
-## **Modeling**
-
-To address our research question, "What factors contribute to an individual's perception of financial independence?" we will employ a Logistic Regression Model. This model is suitable for this situation as it allows us to examine how various predictor variables influence the probability of an individual perceiving financial independence. Given that the variable of interest is binary (yes/no), logistic regression will provide us with estimations of log probabilities and coefficients that will aid in understanding the direction and strength of the relationship between the considered factors and the perception of financial independence. This approach is particularly useful when seeking to identify key contributors to the perception of financial independence in a binary decision-making context.
-
-luego de analizar las variables provistas en el dataset, cuales se podria considerar que pueden influenciar en la variable de independencia financiera, se seleccionaron a priori
-
-## **Results**
-
-## **Future work**
-
-The analysis conducted provides us with a model that allows us to identify the factors influencing people's perception of financial independence. While the obtained results make sense, it's important to consider the limitations of our study.
-
-One key consideration is the potential presence of confounding variables, such as age, which could impact an individual's levels of assets, liabilities, and income. These factors theoretically should influence financial independence. A future analysis could explore the results by removing the confounding variable of age to more precisely assess the impact of the specific factors considered in our model.
-
-Furthermore, it would be relevant to conduct cross-validation analyses to evaluate the model's generalization capacity to unseen data. This helps verify if the model is robust and can be applied to new samples, which is crucial to ensure the reliability of conclusions and the practical utility of the model in different contexts.
-
-In conclusion, by addressing these considerations and conducting additional analyses, we can enhance the robustness and applicability of our model to understand and predict the perception of financial independence.
+In conclusion, by addressing these considerations, we can enhance the
+robustness and applicability of our model to understand the perception
+of financial independence.
 
 {{< pagebreak >}}
 
-## Appendix
+# Appendix
 
-+-------------------------+-----------------------------------------------------------+
-| Variable                | Transformation                                            |
-+-------------------------+-----------------------------------------------------------+
-| political               | Transformed into a factor.\                               |
-|                         | From the original 24 categories, it was grouped into 4: \ |
-|                         | "Democrat"\                                               |
-|                         | "Libertarian Party"\                                      |
-|                         | "Republican"\                                             |
-|                         | "Other"                                                   |
-+-------------------------+-----------------------------------------------------------+
-| age                     | It was transformed from string to numeric.                |
-+-------------------------+-----------------------------------------------------------+
-| edu                     | Transformed into a factor.\                               |
-|                         | From the original 11 categories, it was grouped into 4:\  |
-|                         | "High School or Less"\                                    |
-|                         | "Some College or Trade School"\                           |
-|                         | "Bachelor's or Associate's Degree"\                       |
-|                         | "Doctorate or Master's Degree"                            |
-+-------------------------+-----------------------------------------------------------+
-| fin_indy                | It was transformed from string to binary                  |
-+-------------------------+-----------------------------------------------------------+
-| housing                 | Transformed into a factor.\                               |
-|                         | From the original 19 categories, it was grouped into 3:\  |
-|                         | "Live with family or friends"\                            |
-|                         | "Own"\                                                    |
-|                         | "Rent"                                                    |
-+-------------------------+-----------------------------------------------------------+
-| home_value              | NA replaced with 0\                                       |
-|                         | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| brokerage\              | NA replaced with 0\                                       |
-| \_accts_tax             | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| retirement\             | NA replaced with 0\                                       |
-| \_accts_tax             | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| cash                    | NA replaced with 0\                                       |
-|                         | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| invst_accts             | NA replaced with 0\                                       |
-|                         | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| spec_crypto             | NA replaced with 0\                                       |
-|                         | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| invst_prop_bus_own      | NA replaced with 0\                                       |
-|                         | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| other_val               | NA replaced with 0\                                       |
-|                         | sum in total_assets variable                              |
-+-------------------------+-----------------------------------------------------------+
-| student_loans           | NA replaced with 0\                                       |
-|                         | sum in total_debts variable                               |
-+-------------------------+-----------------------------------------------------------+
-| mortgage                | NA replaced with 0\                                       |
-|                         | sum in total_debts variable                               |
-+-------------------------+-----------------------------------------------------------+
-| auto_loan               | NA replaced with 0\                                       |
-|                         | sum in total_debts variable                               |
-+-------------------------+-----------------------------------------------------------+
-| credit_personal_loan    | NA replaced with 0\                                       |
-|                         | sum in total_debts variable                               |
-+-------------------------+-----------------------------------------------------------+
-| medical_debt            | NA replaced with 0\                                       |
-|                         | sum in total_debts variable                               |
-+-------------------------+-----------------------------------------------------------+
-| invst_prop_bus_own_debt | NA replaced with 0\                                       |
-|                         | sum in total_debts variable                               |
-+-------------------------+-----------------------------------------------------------+
-| other_debt              | NA replaced with 0\                                       |
-|                         | sum in total_debts variable                               |
-+-------------------------+-----------------------------------------------------------+
-| 2020_gross_inc          | NA replaced with 0                                        |
-+-------------------------+-----------------------------------------------------------+
-| 2020_housing_exp        | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_utilities_exp      | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_transp_exp         | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_necessities_exp    | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_lux_exp            | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_child_exp          | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_debt_repay         | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_invst_save         | NA replaced with 0                                        |
-+-------------------------+-----------------------------------------------------------+
-| 2020_charity            | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_healthcare_exp     | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_taxes              | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_edu_exp            | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
-| 2020_other_exp          | NA replaced with 0\                                       |
-|                         | sum in total_expenses variable                            |
-+-------------------------+-----------------------------------------------------------+
+## Variable Transformation
+
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| **Variable**   | **Transformation**                        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| political      | -   From 24 original categories, it was   |
+|                |     grouped into 4:\                      |
+|                |     "Democrat"\                           |
+|                |     "Libertarian Party"\                  |
+|                |     "Republican"\                         |
+|                |     "Other" --\> ("American Solidarity    |
+|                |     Party","Citizens Party of the United  |
+|                |     States","Communist Party              |
+|                |     USA","Constitution Party","Freedom    |
+|                |     Socialist Party","Green               |
+|                |     Party","Humane Party","Independent    |
+|                |     American Party","Legal Marijuana Now  |
+|                |     Party","N/A","NA","National Socialist |
+|                |     Movement","None","Objectivist         |
+|                |     Party","Peace and Freedom             |
+|                |     Party","Socialist Action","Socialist  |
+|                |     Alternative","Socialist Equality      |
+|                |     Party","Socialist Party USA","United  |
+|                |     States Marijuana Party","United       |
+|                |     States Pirate Party","Workers World   |
+|                |     Party")                               |
+|                |                                           |
+|                | -   Transformed into a factor.            |
++----------------+-------------------------------------------+
+| age            | -   It was transformed from string to     |
+|                |     numeric (1-10)                        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| edu            | -   From 11 original categories, it was   |
+|                |     grouped into 4:\                      |
+|                |     "High School or Less" --\> ("High     |
+|                |     School diploma / GED", "Less than     |
+|                |     high school", "Some high school")\    |
+|                |     "Some College or Trade School" --\>   |
+|                |     ("Some college, no degree", "Trade    |
+|                |     School Degree")\                      |
+|                |     "Bachelor's or Associate's Degree"    |
+|                |     --\> ("Associate's Degree",           |
+|                |     "Bachelor's Degree")\                 |
+|                |     "Doctorate or Master's Degree" --\>   |
+|                |     ("Doctorate / Post Graduate",         |
+|                |     "Doctorate / Post-Graduate",          |
+|                |     "Graduate degree")                    |
+|                | -   Transformed into a factor.            |
++----------------+-------------------------------------------+
+| fin_indy       | -   It was transformed from string to     |
+|                |     binary                                |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| housing        | -   From the original 19 categories, it   |
+|                |     was grouped into 2:\                  |
+|                |     "Own" --\> (Own", "Own a house but    |
+|                |     currently living in a RV", "Own a     |
+|                |     house that I rent out but I rent an   |
+|                |     apartment in another state", "Rent    |
+|                |     and own", "Rent my apartment, but own |
+|                |     a home I rent out", "Rent temporarily |
+|                |     while building new home")\            |
+|                |     "Not Own" --\> ("Government housing", |
+|                |     "Homeless", "House owned by parents", |
+|                |     "Houseless/nomadic - living in a car  |
+|                |     voluntarily", "Live with family or    |
+|                |     friends", "Live with family while     |
+|                |     building a house", "Live with partner |
+|                |     and split costs of owning", "Live     |
+|                |     with partner in their house",         |
+|                |     "Liveaboard boat", "Living with       |
+|                |     parents", "NA", "Own and live in a    |
+|                |     van", "Provided by employer or        |
+|                |     school", "Rent")                      |
+|                |                                           |
+|                | -   Transformed into a factor.            |
++----------------+-------------------------------------------+
+| home_value     | -   NA replaced with 0                    |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| broke          | -   NA replaced with 0                    |
+| rage_accts_tax |                                           |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| retire         | -   NA replaced with 0                    |
+| ment_accts_tax |                                           |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| cash           | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| invst_accts    | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| spec_crypto    | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| invs           | -   NA replaced with 0                    |
+| t_prop_bus_own |                                           |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| other_val      | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_assets variable          |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| student_loans  | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_debts variable           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| mortgage       | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_debts variable           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| auto_loan      | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_debts variable           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| credi t\       | -   NA replaced with 0                    |
+| \              |                                           |
+| _personal_loan | -   sum in total_debts variable           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| medical_debt   | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_debts variable           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| invst_pr o     | -   NA replaced with 0                    |
+| p_bus_own_debt |                                           |
+|                | -   sum in total_debts variable           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| other_debt     | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_debts variable           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_gross_inc | -   NA replaced with 0                    |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2 0            | -   NA replaced with 0                    |
+| 20_housing_exp |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 202 0\         | -   NA replaced with 0                    |
+| \              |                                           |
+| _utilities_exp | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2              | -   NA replaced with 0                    |
+| 020_transp_exp |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_n         | -   NA replaced with 0                    |
+| ecessities_exp |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_lux_exp   | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_child_exp | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2              | -   NA replaced with 0                    |
+| 020_debt_repay |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2              | -   NA replaced with 0                    |
+| 020_invst_save |                                           |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_charity   | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020\_         | -   NA replaced with 0                    |
+| healthcare_exp |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_taxes     | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_edu_exp   | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+| \vspace{0.3cm} | \vspace{0.3cm}                            |
+|                |                                           |
+| 2020_other_exp | -   NA replaced with 0                    |
+|                |                                           |
+|                | -   sum in total_expenses variable        |
++----------------+-------------------------------------------+
+
+{{< pagebreak >}}
+
+## Cook's distance
+
+### Model 1
+
+```{r, results = TRUE}
+plot(logistic_mod, which =4)
+```
+
+### Model 2
+
+```{r, results = TRUE}
+plot(logistic_mod2, which =4)
+```
+
+{{< pagebreak >}}
+
+## Confusion Matrix
+
+```{r, results = TRUE}
+reddit_finance_sub <- reddit_finance_sub %>%
+ mutate(fin_indy = ifelse(fin_indy == 1, "Yes", "No"))
+
+confusionMatrix(factor(ifelse(fitted(logistic_mod)>0.067,"Yes","No")),factor(reddit_finance_sub$fin_indy),positive="Yes",mode="everything")
+
+```
+
+```{r}
+print("etwte")
+```
