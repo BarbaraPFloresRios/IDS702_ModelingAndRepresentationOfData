@@ -11,7 +11,7 @@ output:
     latex_engine: xelatex
     keep_tex: true
     latex_args: ["-shell-escape"]
-fontsize: 11pt
+fontsize: 12pt
 header-includes:
   - "\\usepackage[left=0.75in,right=0.75in,top=0.75in,bottom=1.25in]{geometry}"
   - "\\usepackage{enumitem}"
@@ -51,14 +51,15 @@ glimpse(MultinomialData)
 
 # Overview
 
-## Generalized linear model
+## Generalized Linear Model
 
 \vspace{0.3cm}
 
 Generalized Linear Models (GLMs) are a class of statistical models in
 which the relationship between a dependent variable and one or more
-independent variables follows a specific probability distribution. The
-general formula of a Generalized Linear Model (GLM) is expressed as
+independent variables follows a specific probability distribution, such
+as the Normal, Binomial, Poisson, Gamma, and Multinomial distributions.
+The general formula of a Generalized Linear Model (GLM) is expressed as
 follows:
 
 $$
@@ -67,78 +68,94 @@ $$
 
 where
 
-\- $g(μ)$: The link function connecting the mean $μ$ of the response
-variable distribution with the linear combination of predictor variables
-$Xβ$
+-   $g(μ)$: The link function connecting the mean $μ$ of the response
+    variable distribution with the linear combination of predictor
+    variables $Xβ$
 
-\- $X$:The design matrix containing the values of the predictor
-variables.
+-   $X$: The design matrix containing the values of the predictor
+    variables.
 
-\- $β$: The vector of coefficients associated with each predictor
-variable.
+-   $β$: The vector of coefficients associated with each predictor
+    variable.
 
-The choice of probability distribution and the link function allows the
-adaptation of the model to different types of data and relationships
-between variables."
+\vspace{0.3cm}
 
-### Link function
-
--   The link function connects the distribution of the outcome to Y Xβ
-    and indicates how the expected value of the response relates to the
-    linear combination of explanatory variables.
-
--   GLM assumptions include independent distribution of data, a
-    specified distribution for the dependent variable (e.g., Bernoulli
-    for logistic regression), and a linear relationship between the
-    transformed expected response and the explanatory variables.
-
-```{=html}
-<!-- -->
-```
--   Logistic regression and link functions
-
--   Motivation for using logistic regression
-
--   Outcome variable type
-
--   Model example data on pumpkin seeds
-
--   GLM terms: generalized linear models and link functions
-
--   GLM assumptions: independent data, specified distribution for
-    dependent variable, linear relationship between transformed expected
-    response and explanatory variables
-
--   Explanation of why there is no error term
-
-```{=html}
-<!-- -->
-```
--   Motivation for logistic regression and link functions
-
--   Logistic regression is used for binary outcome variables
-
--   Generalized linear models (GLMs) assume the response variable
-    follows a distribution
-
--   Link function connects the distribution of the outcome to the linear
-    combination of explanatory variables
-
--   GLM assumptions include independent distribution of data, specified
-    distribution for the dependent variable, and linear relationship
-    between the transformed expected response and explanatory variables
+The main purpose of GLMs is to provide a statistical framework for
+modeling the relationship between a dependent variable and one or more
+independent variables, allowing flexibility in the distribution of the
+dependent variable. The choice of probability distribution and the link
+function allows the adaptation of the model to different types of data
+and relationships between variables.
 
 ### Link function
+
+The purpose of a link function in GLMs is to connect the distribution of
+the outcome variable to the linear predictors, defining the relationship
+between the linear predictor and the expected value (mean) of the
+response variable. It indicates how the expected value of the response
+variable relates to the linear combination of explanatory variables. In
+logistic regression, for example, the link function is the logit
+function, which transforms the probability of the outcome variable into
+a log-odds format. This allows us to model a binary response variable
+using a linear combination of predictors. Within a GLM, the link
+function transforms the linear combination of predictor variables into a
+format that is appropriate for modeling the mean of the response
+variable. This conversion is crucial, ensuring that the forecasted
+values conform to the particular range determined by the characteristics
+of the response distribution.
 
 ### GLM Assumptions
 
+GLMs consider the following assumptions:
+
+-   The data are independently distributed.
+
+-   The dependent variable Y follows a specific distribution.
+
+-   There is a linear relationship between the transformed expected
+    response, in terms of the link function, and the explanatory
+    variables.
+
+\vspace{0.3cm}
+
+In particular, in this tutorial, we will address a type of GLM,
+Multinomial Logistic Regression, which is detailed in the following
+sections
+
+\vspace{0.3cm}
+
 ## Multinomial Logistic Regression
+
+Multinomial logistic regression is a form of GLM employed when the
+outcome variable encompasses multiple categories. In this regression,
+the multinomial distribution is utilized to model the outcome variable.
+
+### Examples of research questions 
+
+Some examples of research questions that could be answered with
+Multinomial logistic regression are:
+
+-   **Inference problem:** Within the context of a university student
+    having the choice to enroll in a major among the academic
+    departments of 'Social Sciences and Humanities,' 'Health Sciences,'
+    'Natural Sciences and Mathematics,' and 'Arts,' what
+    sociodemographic variables significantly influence the selection of
+    academic departments?
+
+-   **Prediction problem:** Based on a new customer's viewing history on
+    a movie streaming service, which includes variables such as the
+    number and type of movies watched, total duration in minutes, etc.,
+    what option is the customer most likely to choose at the conclusion
+    of the 30-day trial period: cancel their subscription, subscribe to
+    the monthly plan, or subscribe to the annual plan?
+
+# Probability Distribution
 
 $Pr(\theta | y) \propto Pr(y | \theta) Pr(\theta)$
 
 $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
 
-# Probability Distribution
+### 
 
 # Data Example:
 
