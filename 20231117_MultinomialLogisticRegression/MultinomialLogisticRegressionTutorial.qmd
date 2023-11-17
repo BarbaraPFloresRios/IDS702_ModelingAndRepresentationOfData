@@ -1,0 +1,48 @@
+---
+title: "Multinomial Logistic Regression Tutorial"
+author: "Barbara Flores"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    number-depth: 3
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+    keep_tex: true
+    latex_args: ["-shell-escape"]
+fontsize: 11pt
+header-includes:
+  - "\\usepackage[left=0.75in,right=0.75in,top=0.75in,bottom=1.25in]{geometry}"
+  - "\\usepackage{enumitem}"
+  - "\\setlist{noitemsep, topsep=0pt, parsep=2pt, partopsep=0pt}"
+  - "\\setlength{\\parskip}{0pt}"
+  - "\\RedeclareSectionCommand[beforeskip=-1sp,afterskip=0.5\\baselineskip]{section}"
+  - "\\RedeclareSectionCommand[beforeskip=-1sp,afterskip=0.25\\baselineskip]{subsection}"
+
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+\setcounter{page}{0}
+
+\thispagestyle{empty}
+
+{{< pagebreak >}}
+
+```{r, include = FALSE}
+# Global settings to hide code and results in the final document
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results= 'hide')
+```
+
+```{r}
+library(pacman)
+p_load(openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071, sjPlot)
+```
+
+```{r}
+MultinomialData <-  data("MultinomialData.csv")
+glimpse(MultinomialData)
+
+```
