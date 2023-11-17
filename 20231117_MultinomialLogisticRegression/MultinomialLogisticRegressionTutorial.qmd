@@ -1,5 +1,5 @@
 ---
-title: "Multinomial Logistic Regression Tutorial"
+title: "Multinomial Regression Tutorial"
 author: "Barbara Flores"
 format:
   pdf:
@@ -11,7 +11,7 @@ output:
     latex_engine: xelatex
     keep_tex: true
     latex_args: ["-shell-escape"]
-fontsize: 12pt
+fontsize: 11pt
 header-includes:
   - "\\usepackage[left=0.75in,right=0.75in,top=0.75in,bottom=1.25in]{geometry}"
   - "\\usepackage{enumitem}"
@@ -87,7 +87,7 @@ dependent variable. The choice of probability distribution and the link
 function allows the adaptation of the model to different types of data
 and relationships between variables.
 
-### Link function
+### Link Function
 
 The purpose of a link function in GLMs is to connect the distribution of
 the outcome variable to the linear predictors, defining the relationship
@@ -124,16 +124,16 @@ sections
 
 \vspace{0.3cm}
 
-## Multinomial Logistic Regression
+## Multinomial Regression
 
-Multinomial logistic regression is a form of GLM employed when the
-outcome variable encompasses multiple categories. In this regression,
-the multinomial distribution is utilized to model the outcome variable.
+Multinomial regression is a form of GLM employed when the outcome
+variable encompasses multiple categories. In this regression, the
+multinomial distribution is utilized to model the outcome variable.
 
 ### Examples of research questions 
 
 Some examples of research questions that could be answered with
-Multinomial logistic regression are:
+Multinomial regression are:
 
 -   **Inference problem:** Within the context of a university student
     having the choice to enroll in a major among the academic
@@ -142,6 +142,8 @@ Multinomial logistic regression are:
     sociodemographic variables significantly influence the selection of
     academic departments?
 
+    \vspace{0.3cm}
+
 -   **Prediction problem:** Based on a new customer's viewing history on
     a movie streaming service, which includes variables such as the
     number and type of movies watched, total duration in minutes, etc.,
@@ -149,14 +151,62 @@ Multinomial logistic regression are:
     of the 30-day trial period: cancel their subscription, subscribe to
     the monthly plan, or subscribe to the annual plan?
 
-# Probability Distribution
+    \vspace{0.3cm}
 
-$Pr(\theta | y) \propto Pr(y | \theta) Pr(\theta)$
+# Probability Distribution: Multinomial
 
-$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+The multinomial distribution models the probability of observing a
+specific vector of event counts across $k$ different categories, after
+conducting $n$ independent trials. The Probability Mass Function (PMF)
+describes the joint probability of observing $x_1$ events in category 1,
+$x_2$ events in category 2, and so forth. The PMF is expressed by the
+following formula:
 
-### 
+\vspace{0.3cm}
 
-# Data Example:
+**Probability Mass Function**
 
-# Probability Distribution
+$$Pr(X_1 = x_1, ... , X_k = x_k) = \frac{n!}{x_1!...x_k!}p_1^{x_1}...p_k^{x_k}$$
+
+Now, let's delve into the support of the multinomial distribution, which
+outlines the valid range of counts for each category, providing insights
+into the possible outcomes of the experiment:
+
+\vspace{0.3cm}
+
+**Support** $$
+x_i\,\epsilon\{0,..,n\},  i\,\epsilon\{1,..,k\}, with\: \sum\limits_i x_i=n
+$$
+
+Each $x_i$represents the count of occurrences for event $i$, and it can
+range from 0 to the total number of trials $n$. The constraint
+$\sum\limits_i x_i=n$ ensures that the total count of occurrences across
+all categories equals the total number of trials, emphasizing the nature
+of the distribution.
+
+The parameters of this probability distribution model, adhere to the
+following constraints:
+
+\vspace{0.3cm}
+
+**Parameters**
+
+\centering
+
+$n > 0$ number of trials, $k > 0$ number of mutually exclusive events,
+
+$p_1,....p_k$ event probabilities ($\: \sum\limits_i p_i=1$)
+
+\raggedright
+
+sdds
+
+sdsd
+
+\vspace{0.3cm}
+
+# The Model
+
+# Data Example
+
+# 
