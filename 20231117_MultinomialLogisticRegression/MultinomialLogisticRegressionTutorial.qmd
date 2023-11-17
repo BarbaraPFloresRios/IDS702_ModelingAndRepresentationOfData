@@ -42,7 +42,9 @@ p_load(openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071, sjPlot)
 ```
 
 ```{r}
-MultinomialData <-  data("MultinomialData.csv")
+path = "https://raw.githubusercontent.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/main/20231117_MultinomialLogisticRegression/MultinomialData.csv"
+
+MultinomialData <-  read_csv(path)
 glimpse(MultinomialData)
 
 ```
