@@ -304,11 +304,17 @@ cats <-  read_csv(path)
 cats$breed <- factor(cats$Y, levels = c(1, 2, 3), labels = c("Siamese", "Persian", "Siberian"))
 
 cats$gender <- ifelse(cats$X2 == 0, "Male", "Female")
+cats$gender <- factor(cats$gender)
+
 
 cats <- cats %>%
   rename(length_inches = X1)
 
 cats <- cats %>%
   select(-X2, -Y)
+
+```
+
+```{r}
 
 ```
