@@ -11,9 +11,9 @@ output:
     latex_engine: xelatex
     keep_tex: true
     latex_args: ["-shell-escape"]
-fontsize: 11pt
+fontsize: 9pt
 header-includes:
-  - "\\usepackage[left=0.75in,right=0.75in,top=0.75in,bottom=1.25in]{geometry}"
+  - "\\usepackage[left=0.7in,right=0.7in,top=0.7in,bottom=1.15in]{geometry}"
   - "\\usepackage{enumitem}"
   - "\\setlist{noitemsep, topsep=0pt, parsep=2pt, partopsep=0pt}"
   - "\\setlength{\\parskip}{0pt}"
@@ -33,14 +33,14 @@ editor:
 
 ```{r, include = FALSE}
 # Global settings to hide code and results in the final document
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results= 'hide')
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results= TRUE)
 ```
 
 # Overview
 
 ## Generalized Linear Model
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 Generalized Linear Models (GLMs) are a class of statistical models in
 which the relationship between a dependent variable and one or more
@@ -65,7 +65,7 @@ where
 -   $β$: The vector of coefficients associated with each predictor
     variable.
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 The main purpose of GLMs is to provide a statistical framework for
 modeling the relationship between a dependent variable and one or more
@@ -103,12 +103,12 @@ GLMs consider the following assumptions:
     response, in terms of the link function, and the explanatory
     variables.
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 In particular, in this tutorial, we will address a type of GLM,
 Multinomial Regression, which is detailed in the following sections
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 ## Multinomial Regression
 
@@ -121,7 +121,7 @@ multinomial distribution is utilized to model the outcome variable.
 Some examples of research questions that could be answered with
 Multinomial regression are:
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 -   **Inference problem:** Within the context of a university student
     having the choice to enroll in a major among the academic
@@ -130,7 +130,7 @@ Multinomial regression are:
     sociodemographic variables significantly influence the selection of
     academic departments?
 
-    \vspace{0.3cm}
+    \vspace{0.5cm}
 
 -   **Prediction problem:** Based on a new customer's viewing history on
     a movie streaming service, which includes variables such as the
@@ -139,7 +139,7 @@ Multinomial regression are:
     of the 30-day trial period: cancel their subscription, subscribe to
     the monthly plan, or subscribe to the annual plan?
 
-    \vspace{0.3cm}
+    \vspace{0.5cm}
 
 # Multinomial Distribution
 
@@ -150,7 +150,7 @@ describes the joint probability of observing $x_1$ events in category 1,
 $x_2$ events in category 2, and so forth. The PMF is expressed by the
 following formula:
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 **Probability Mass Function**
 
@@ -160,7 +160,7 @@ Now, let's delve into the support of the multinomial distribution, which
 outlines the valid range of counts for each category, providing insights
 into the possible outcomes of the experiment:
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 **Support** $$
 x_i\,\epsilon\{0,..,n\},  i\,\epsilon\{1,..,k\}, with\: \sum\limits_i x_i=n
@@ -172,28 +172,28 @@ $\sum\limits_i x_i=n$ ensures that the total count of occurrences across
 all categories equals the total number of trials, emphasizing the nature
 of the distribution.
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 Finally, the parameters of this probability distribution model, adhere
 to the following constraints:
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 **Parameters**
-
-\centering
 
 $n > 0$ number of trials, $k > 0$ number of mutually exclusive events,
 
 $p_1,....p_k$ event probabilities ($\: \sum\limits_i p_i=1$)
 
-\raggedright
-
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 # Model
 
+\vspace{0.5cm}
+
 ## General Form
+
+\vspace{0.5cm}
 
 The general equation for Multinomial Regression can be expressed as
 follows:
@@ -217,15 +217,17 @@ $$
 -   $x_{i1}, x_{i2}, \ldots, x_{ip}$ represent the predictor variables
     for observation $i$.
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 This equation models the log-odds ratio of the probability of belonging
 to category $j$ compared to the reference category, providing a flexible
 framework for analyzing outcomes with more than two categories.
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 ## Link function
+
+\vspace{0.5cm}
 
 In this general equation, the link function is represented by a logit
 function: $log(\frac{\pi_{ij}}{\pi_{i1}})$. In multinomial regression,
@@ -252,9 +254,11 @@ logit function demonstrates **numerical stability**, especially when
 handling extreme probabilities, thereby contributing to the reliability
 and robustness of the estimation process.
 
-\vspace{0.3cm}
+\vspace{0.5cm}
 
 ## Model assumptions
+
+\vspace{0.5cm}
 
 The assumptions of multinomial logistic regression include:
 
@@ -272,7 +276,15 @@ The assumptions of multinomial logistic regression include:
     probabilities of choosing one category over another are not affected
     by the inclusion or exclusion of alternative categories.
 
+\vspace{0.5cm}
+
 # Data Example
+
+\vspace{0.5cm}
+
+## Dataset
+
+\vspace{0.5cm}
 
 To better understand the Multinomial Regression Tutorial model, we will
 review a practical example implemented in R. For this purpose, we will
@@ -285,14 +297,15 @@ page.](https://anlane611.github.io/ids702-fall23/DAA/DA3.html#data-generation)
 For the purposes of this example, let's consider that this dataset
 represents various records of cats. Here, Y represents the cat's breed,
 with 1 = Siamese, 2 = Persian, and 3 = Siberian. Additionally, X1
-represents the cat's length in inches, and X2 represents gender, where 0
-= Male and 1 = Female. The objective of our example will be to define a
-model such that, based on the cat's length and gender, we can predict
-its breed.
+represents the cat's length in inches, and X2 represents color, where 0
+= Solid and 1 = Spotted. The objective of our example will be to define
+a model such that, based on the cat's length and color, we can predict
+its breed. The dataset has 344 observations. The variables **breed**,
+**color**, and **length inches** are distributed as follows:
 
 ```{r}
 library(pacman)
-p_load(dplyr)
+p_load(dplyr,tidyverse, nnet )
   #openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071, sjPlot)
 ```
 
@@ -303,8 +316,8 @@ cats <-  read_csv(path)
 
 cats$breed <- factor(cats$Y, levels = c(1, 2, 3), labels = c("Siamese", "Persian", "Siberian"))
 
-cats$gender <- ifelse(cats$X2 == 0, "Male", "Female")
-cats$gender <- factor(cats$gender)
+cats$color <- factor(ifelse(cats$X2 == 0, "Solid", "Spotted"))
+cats$color <- factor(cats$color)
 
 
 cats <- cats %>%
@@ -315,6 +328,168 @@ cats <- cats %>%
 
 ```
 
-```{r}
+```{r, fig.width=8, fig.height=2.8}
+
+par(mfrow = c(1, 3), mar = c(5, 4, 4, 2))
+
+hist(cats$length_inches, main = "Cat Length Distribution in Inches", xlab = "Length (inches)", ylab = "Frequency", col = "#87CEEB")
+
+barplot(table(cats$breed), main = "Cat Breed Distribution", xlab = "Breed", ylab = "Frequency", col = c("#ADD8E6", "#FFB6C1", "#B19CD9"), cex.names = 0.9)
+
+barplot(table(cats$color), main = "Cat Color Distribution", xlab = "Color", ylab = "Frequency", col = c("#FFD700", "#FFA07A"))
+
+par(mfrow = c(1, 1))
+
+
+```
+
+From the graphs, we can see that there does appear to be a difference in
+the length among different types of cats and their breeds. For different
+colors, the distribution of length seems similar for both colors.
+
+\vspace{0.5cm}
+
+## Model Fitting
+
+\vspace{0.5cm}
+
+To implement the Multinomial regression model, we will follow the
+following steps. First, it is important to have performed data cleaning
+and transformed the variables into their corresponding types. In our
+case, we already have a clean database, **cats**, which includes the
+numeric variables l**ength inches** and the factor variables **breed**
+and **color**. So, we will proceed with the model fitting.
+
+In the following code, first, we use the library function to load the
+**nnet** package, which is necessary for fitting multinomial regression
+models. Then, we rearrange the **breed** variable using **Siamese** as
+the new reference level with relevel. This step is crucial as it affects
+how the other categories will be interpreted in the model. By fitting a
+multinomial model with the predictor variables **color** and
+**length_inches** using **breed2** as the response variable, we are
+establishing a baseline for comparison. Subsequent estimates and
+comparisons will be made in relation to the reference category, in this
+case, **Siamese**. This approach aids in interpreting differences
+between **breed2** categories based on how they differ from 'Siamese'
+
+```{r, echo = TRUE}
+library(nnet)
+cats$breed2 <- relevel(cats$breed, ref = "Siamese")
+model <- multinom(breed2 ~ color + length_inches, data = cats)
+```
+
+\
+The output indicates successful convergence of the multinomial
+regression model in 10 iterations, with a notable improvement from the
+initial value.
+
+\vspace{0.5cm}
+
+## Model Interpretation
+
+\vspace{0.5cm}
+
+After fitting the model, we print a summary to examine the statistics
+and parameters of the model using the following line:
+
+```{r, echo = TRUE}
+summary(model)
+```
+
+From the obtained results, we can observe the following:
+
+The **coefficients** indicate the direction and magnitude of the impact
+of each predictor on the odds of being in different **breed**
+categories. For instance, compared to **Siamese** (the reference
+category), **Persian** shows an odds increase of 3.37 in the intercept,
+a decrease of 0.22 in **length inches**, and a decrease of 1.29 if the
+color is **Spotted**.
+
+For every one-unit increase in **length inches** the odds of the outcome
+being **Persian** (as opposed to 'Siamese') decrease by approximately
+20%. Given:
+
+$$
+e^{-0.2237668}=0.8
+$$
+
+$$
+1-0.8 = 0.2
+$$
+
+The **Standard Errors** provide a measure of the precision of the
+estimated coefficients. The smaller the standard error, the more
+accurate the estimated coefficient.
+
+The **Residual Deviance** is a measure of how much better the model fits
+compared to a null model. Lower values indicate a better fit.
+
+**AIC (Akaike Information Criterion)** is a criterion assessing the
+model's quality, taking into account complexity. A lower AIC is
+preferred, suggesting a better balance between model fit and complexity.
+In general, this term is used to compare different models.
+
+\vspace{0.5cm}
+
+## Model Assessment
+
+\vspace{0.5cm}
+
+The next step in our tutorial is to assess the model's performance. We
+utilize the confusionMatrix function, which compares the model's
+predictions obtained with **`head(predict(model))`** against the actual
+breed categories in the dataset (**`cats$breed2`**). This step provides
+a detailed evaluation, helping us understand the model's accuracy and
+its capability to correctly classify observations into different breed
+categories. For this task, we'll need to load the **`caret`** package
+beforehand. Finally, the necessary codes for this assessment can be
+found below
+
+```{r, echo = TRUE}
+library(caret)
+
+confusionMatrix(predict(model), cats$breed2, mode = "everything")
+```
+
+The confusion matrix and accompanying statistics reveal insights into
+the multinomial logistic regression model's performance. With an overall
+accuracy of approximately 52.91%, the model demonstrates a moderate
+ability to correctly predict cat breeds based on length and color.
+However, the relatively low precision and recall values for individual
+breed categories, particularly for Persian cats, suggest challenges in
+accurately distinguishing among the breeds. Further refinement of the
+model or exploration of additional features may enhance its predictive
+capabilities. The Kappa statistic of 0.1913 indicates only fair
+agreement beyond what would be expected by chance. These findings
+highlight the importance of considering both overall accuracy and
+individual class performance when evaluating the model's effectiveness.
+To visualize the outcomes of our model, we project the values of our
+response variable (breed) onto synthesized data for the independent
+variables (length_inches, color), spanning their potential values. The
+predict function is utilized to yield the output as a probability,
+facilitating interpretation.The graph below illustrates the
+probabilities of the breed falling into the feasible categories based on
+the values of the independent variables. The probabilities (represented
+by colored lines) will always sum to 1 for a given value of the
+independent variables. The likelihood of the breed being Persian, in
+comparison to Siamese, diminishes with an increase in length inches and
+if the color is Spotted rather than Solid.
+
+```{r, echo = TRUE}
+plot_df <- data.frame(
+  length_inches = rep(seq(min(cats$length_inches), max(cats$length_inches), 0.1), 2),
+  color = rep(c("Solid", "Spotted"), each = 166)
+)
+
+preds <- cbind(plot_df, predict(model, newdata = plot_df, type = "probs"))
+
+preds_long <- gather(preds, "level", "probability", 3:5)
+preds_long$color <- as.factor(preds_long$color)
+
+ggplot(preds_long, aes(x = length_inches, y = probability, col = color)) +
+  geom_line() +
+  facet_grid(level ~ .)
+  
+
 
 ```
