@@ -36,19 +36,6 @@ editor:
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, results= 'hide')
 ```
 
-```{r}
-library(pacman)
-p_load(openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071, sjPlot)
-```
-
-```{r}
-path = "https://raw.githubusercontent.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/main/20231117_MultinomialLogisticRegression/MultinomialData.csv"
-
-MultinomialData <-  read_csv(path)
-glimpse(MultinomialData)
-
-```
-
 # Overview
 
 ## Generalized Linear Model
@@ -119,8 +106,7 @@ GLMs consider the following assumptions:
 \vspace{0.3cm}
 
 In particular, in this tutorial, we will address a type of GLM,
-Multinomial Logistic Regression, which is detailed in the following
-sections
+Multinomial Regression, which is detailed in the following sections
 
 \vspace{0.3cm}
 
@@ -130,10 +116,12 @@ Multinomial regression is a form of GLM employed when the outcome
 variable encompasses multiple categories. In this regression, the
 multinomial distribution is utilized to model the outcome variable.
 
-### Examples of research questions 
+### Examples of research questions
 
 Some examples of research questions that could be answered with
 Multinomial regression are:
+
+\vspace{0.3cm}
 
 -   **Inference problem:** Within the context of a university student
     having the choice to enroll in a major among the academic
@@ -153,7 +141,7 @@ Multinomial regression are:
 
     \vspace{0.3cm}
 
-# Probability Distribution: Multinomial
+# Multinomial Distribution
 
 The multinomial distribution models the probability of observing a
 specific vector of event counts across $k$ different categories, after
@@ -184,8 +172,10 @@ $\sum\limits_i x_i=n$ ensures that the total count of occurrences across
 all categories equals the total number of trials, emphasizing the nature
 of the distribution.
 
-The parameters of this probability distribution model, adhere to the
-following constraints:
+\vspace{0.3cm}
+
+Finally, the parameters of this probability distribution model, adhere
+to the following constraints:
 
 \vspace{0.3cm}
 
@@ -199,14 +189,129 @@ $p_1,....p_k$ event probabilities ($\: \sum\limits_i p_i=1$)
 
 \raggedright
 
-sdds
+\vspace{0.3cm}
 
-sdsd
+# Model
+
+## General Form
+
+The general equation for Multinomial Regression can be expressed as
+follows:
+
+$$
+log(\frac{\pi_{ij}}{\pi_{i1}}) = β_{0j} + β_{1j}x_{i1}+...+ β_{pj}x_{ip}
+$$
+
+-   $\pi_{ij}$ represents the probability of an observation $i$
+    belonging to category $j$ of the response variable.
+
+-   $\pi_{i1}$ is the probability of the reference category for
+    observation $i$.
+
+-   $\beta_{0j}$ is the intercept for category $j$.
+
+-   $\beta_{1j}, \beta_{2j}, \ldots, \beta_{pj}$ are the coefficients
+    associated with predictor variables $x_{i1}, x_{i2}, \ldots, x_{ip}$
+    for category $j$
+
+-   $x_{i1}, x_{i2}, \ldots, x_{ip}$ represent the predictor variables
+    for observation $i$.
 
 \vspace{0.3cm}
 
-# The Model
+This equation models the log-odds ratio of the probability of belonging
+to category $j$ compared to the reference category, providing a flexible
+framework for analyzing outcomes with more than two categories.
+
+\vspace{0.3cm}
+
+## Link function
+
+In this general equation, the link function is represented by a logit
+function: $log(\frac{\pi_{ij}}{\pi_{i1}})$. In multinomial regression,
+the most commonly used link function is the logit function, which is
+defined as the natural logarithm of the ratio of the probability of
+belonging to a specific category to the probability of belonging to the
+reference category.
+
+The choice of the logit function as the link function in multinomial
+regression is grounded in its ability to **map probabilities onto a
+range covering all real numbers.** By transforming probabilities into
+log-odds, the logit function establishes a linear relationship between
+predictors and the log-odds of each category relative to the reference
+category. This not only simplifies interpretation but also ensures that
+model estimates are situated on a suitable scale for regression
+analysis. Furthermore, the logit function provides a level of
+**interpretability** that aligns with changes in predictor variables.
+Its **symmetry in odds** ratios across categories promotes consistency
+in comparing the effects of predictors on different outcome categories.
+**Widely adopted and standardized,** the logit function enjoys common
+usage in statistical literature and software packages, enhancing its
+practicality and facilitating cross-study comparisons. Additionally, the
+logit function demonstrates **numerical stability**, especially when
+handling extreme probabilities, thereby contributing to the reliability
+and robustness of the estimation process.
+
+\vspace{0.3cm}
+
+## Model assumptions
+
+The assumptions of multinomial logistic regression include:
+
+-   The dependent variable must be categorical and multinomial.
+
+-   Observations must be independent.
+
+-   There should be no perfect multicollinearity among independent
+    variables.
+
+-   Log-odds probabilities are assumed to be a linear function of
+    independent variables.
+
+-   Independence of irrelevant alternatives is assumed, meaning that the
+    probabilities of choosing one category over another are not affected
+    by the inclusion or exclusion of alternative categories.
 
 # Data Example
 
-# 
+To better understand the Multinomial Regression Tutorial model, we will
+review a practical example implemented in R. For this purpose, we will
+use a simulated database generated using probability distribution
+functions in R. The dataset is clean, containing no missing data, and
+comprises three variables: Y, X1, and X2. More details about the data
+generation are included at the end of [this
+page.](https://anlane611.github.io/ids702-fall23/DAA/DA3.html#data-generation)
+
+For the purposes of this example, let's consider that this dataset
+represents various records of cats. Here, Y represents the cat's breed,
+with 1 = Siamese, 2 = Persian, and 3 = Siberian. Additionally, X1
+represents the cat's length in inches, and X2 represents gender, where 0
+= Male and 1 = Female. The objective of our example will be to define a
+model such that, based on the cat's length and gender, we can predict
+its breed.
+
+```{r}
+library(pacman)
+p_load(dplyr)
+  #openintro, tidyverse,dplyr,tidyr, caret, pROC, e1071, sjPlot)
+```
+
+```{r}
+path = "https://raw.githubusercontent.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/main/20231117_MultinomialLogisticRegression/MultinomialData.csv"
+
+cats <-  read_csv(path)
+
+
+cats$breed <- factor(cats$Y, levels = c(1, 2, 3), labels = c("Siamese", "Persian", "Siberian"))
+
+
+
+# Verificar los cambios
+print(cats$breed)
+
+cats <- cats %>%
+  select(-Y)
+
+# Verificar los cambios
+print(cats$breed)
+```
