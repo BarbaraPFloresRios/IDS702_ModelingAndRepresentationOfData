@@ -301,17 +301,14 @@ path = "https://raw.githubusercontent.com/BarbaraPFloresRios/IDS702_ModelingAndR
 
 cats <-  read_csv(path)
 
-
 cats$breed <- factor(cats$Y, levels = c(1, 2, 3), labels = c("Siamese", "Persian", "Siberian"))
 
-
-
-# Verificar los cambios
-print(cats$breed)
+cats$gender <- ifelse(cats$X2 == 0, "Male", "Female")
 
 cats <- cats %>%
-  select(-Y)
+  rename(length_inches = X1)
 
-# Verificar los cambios
-print(cats$breed)
+cats <- cats %>%
+  select(-X2, -Y)
+
 ```
