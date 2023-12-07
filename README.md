@@ -7,3 +7,4 @@ For more information about the course, please visit the course website: [IDS702 
 1. [Linear Regression: Airbnb Pricing](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/tree/main/20231001_LinearRegression)
 2. [Logistic Regression: Financial Independence Survey](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/tree/main/20231019_LogisticRegression)
 3. [MultinomialLogisticRegression](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/tree/main/20231117_MultinomialLogisticRegression)
+4. [TeamProject_LogisticRegression_LinearRegression](https://github.com/BarbaraPFloresRios/IDS702_ModelingAndRepresentationOfData/tree/main/20231201_TeamProject_LogisticRegression_LinearRegression)
